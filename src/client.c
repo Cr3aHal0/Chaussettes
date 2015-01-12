@@ -64,15 +64,14 @@ int main(int argc, char * argv[])
     }
 
     //Connexion au serveur
-    rc = connect(sd, (struct sockaddr *) &servAddr, sizeof(servAddr));
-    if(rc < 0)
+    if(connect(sd, (struct sockaddr *) &servAddr, sizeof(servAddr)) < 0)
     {
         perror("Cannot connect : ");
         exit(ERROR);
     }
 
 
-    rc = send(sd, argv[2], strlen(argv[2])+1, 0);
+    rc = write(sd, argv[2], strlen(argv[2])+1);
     if(rc < 0)
     {
         printf("Cannot send data : ");
@@ -80,16 +79,8 @@ int main(int argc, char * argv[])
         exit(ERROR);
     }
 
-    rc = send(sd, argv[3], strlen(argv[3])+1, 0);
-    if(rc < 0)
-    {
-        printf("Cannot send data : ");
-        close(sd);
-        exit(ERROR);
-    }
 
     printf("%s : data %u send (%s)\n", argv[0], i-1, argv[2]);
-		printf("%s : data %u send (%s)\n", argv[0], i-1, argv[3]);
 
     return(SUCCESS);
 }
