@@ -1,3 +1,10 @@
+/**
+ * Note : 
+ * 	Le serveur possède plusieurs salons (10)
+ * 	Quand un joueur joue sur une grille, il joue sur la grille du salon, et pas directement depuis le serveur.
+ * 
+ **/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -10,6 +17,7 @@
 #include <string.h>
 
 #include "grille.h"
+//#include "salon.h"
 
 
 
@@ -20,13 +28,13 @@
 #define ERROR 1
 #define SERVER_PORT 1500
 
-
 int main(int argc,char *argv[])
 {
 
 	int i, j, k;
 	int couleur;
 	char position[1];
+	//Salon_t liste_salon[10];
 	int grille[TAILLE_LIGNE][TAILLE_COLONNE] = {0};
 
     int sd,newSd;
@@ -78,8 +86,11 @@ int main(int argc,char *argv[])
 			printf("%s: received from %s:TCP%d : %s \n",argv[0],inet_ntoa(cliAddr.sin_addr),ntohs(cliAddr.sin_port), position);
 			
 			placerJeton(atoi(position), ROUGE, grille);
-			
 			afficherGrille(grille);
+			//write(newSd, ROUGE, sizeof(int));
+			//Envoi de la grille apres que le joueur ai joué
+			write(newSd, grille, sizeof(int)*TAILLE_COLONNE*TAILLE_LIGNE);
+			
 			
         
 
