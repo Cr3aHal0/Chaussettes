@@ -84,9 +84,9 @@ int main(int argc, char * argv[])
     printf("%s : data %u send (%s)\n", argv[0], i-1, argv[2]);
     
     int couleur;
-    read(sd, couleur, sizeof(int));
+    /*read(sd, couleur, sizeof(int));
     if(couleur == 1) printf("Vous etes le joueur rouge");
-    else printf("Vous etes le joueur jaune");
+    else printf("Vous etes le joueur jaune");*/
     read(sd, grille, sizeof(int)*TAILLE_COLONNE*TAILLE_LIGNE);
     
     afficherGrille(grille);
