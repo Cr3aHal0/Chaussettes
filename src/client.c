@@ -9,6 +9,7 @@
 #include <string.h>
 #include <errno.h>
 
+#include "grille.h"
 
 #define SUCCESS 0
 #define ERROR 1
@@ -19,6 +20,7 @@ int main(int argc, char * argv[])
 {
 
     int sd, rc, i;
+    int grille[TAILLE_LIGNE][TAILLE_COLONNE];
     struct sockaddr_in localAddr, servAddr;
     struct hostent * h;
 
@@ -55,8 +57,7 @@ int main(int argc, char * argv[])
     localAddr.sin_port = htons(0);
 
     //Bind
-    rc = bind(sd, (struct sockaddr *) &localAddr, sizeof(localAddr));
-    if(rc < 0)
+    if(bind(sd, (struct sockaddr *) &localAddr, sizeof(localAddr)) < 0)
     {
         printf("%s : cannot bind port TCP %u\n", argv[0], SERVER_PORT);
         perror("Error : ");
@@ -71,16 +72,25 @@ int main(int argc, char * argv[])
     }
 
 
-    rc = write(sd, argv[2], strlen(argv[2])+1);
-    if(rc < 0)
+    
+    if(write(sd, argv[2], strlen(argv[2])+1) < 0)
     {
         printf("Cannot send data : ");
         close(sd);
         exit(ERROR);
     }
-
-
+	
+	
     printf("%s : data %u send (%s)\n", argv[0], i-1, argv[2]);
+    
+    int couleur;
+    read(sd, couleur, sizeof(int));
+    if(couleur == 1) printf("Vous etes le joueur rouge");
+    else printf("Vous etes le joueur jaune");
+    read(sd, grille, sizeof(int)*TAILLE_COLONNE*TAILLE_LIGNE);
+    
+    afficherGrille(grille);
+   
 
     return(SUCCESS);
 }
