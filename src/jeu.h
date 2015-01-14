@@ -1,8 +1,0 @@
-
-#define TAILLE_LIGNE 7
-#define TAILLE_COLONNE 6
-
-enum {BLANC, ROUGE, JAUNE};
-
-
-
