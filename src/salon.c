@@ -10,7 +10,7 @@ int ajouter_joueur(Salon_t * salon, int joueur)
 	//Si le salon est plein, on refuse la connexion
 	if (salon->liste_joueur[0] != 0 && salon->liste_joueur[1] != 0)
 	{
-		printf("Impossible de se connecter : Salon plein");
+		printf("Impossible de se connecter : Salon plein\n");
 		return -1;
 	}
 	
@@ -41,10 +41,10 @@ void afficher_infos_salon(Salon_t salon)
 	
 }
 
-void raz_salon(Salon_t salon)
+void raz_salon(Salon_t* salon)
 {
-	salon.liste_joueur[0] = 0;
-	salon.liste_joueur[1] = 0;
+	salon->liste_joueur[0] = 0;
+	salon->liste_joueur[1] = 0;
 	//Pas content avec ça
 	//salon.grille = {0};
 	int i, j;
@@ -53,7 +53,7 @@ void raz_salon(Salon_t salon)
 	{
 		for (j = 0; j < TAILLE_LIGNE; j++)
 		{	
-			salon.grille[j][i] = 0;
+			salon->grille[j][i] = 0;
 		}
 	}	
 }
@@ -63,11 +63,15 @@ int main()
 {
 
 	Salon_t salon;
-	raz_salon(salon);
+	raz_salon(&salon);
 	afficher_infos_salon(salon);
 	ajouter_joueur(&salon, 1);
 	afficher_infos_salon(salon);
 	ajouter_joueur(&salon, 2);
+	afficher_infos_salon(salon);
+	ajouter_joueur(&salon, 3);
+	afficher_infos_salon(salon);
+	raz_salon(&salon);
 	afficher_infos_salon(salon);
 	
 }
