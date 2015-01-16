@@ -9,32 +9,27 @@
 #include <string.h>
 #include <errno.h>
 
-#include "grille.h"
+//#include "grille.h"
+#include "client.h"
 
 #define SUCCESS 0
 #define ERROR 1
 #define SERVER_PORT 1500
 #define MAX_MSG 100
 
-int main(int argc, char * argv[])
+
+int se_connecter(char* adresse_ip)
 {
-
-    int sd, rc, i;
-    int grille[TAILLE_LIGNE][TAILLE_COLONNE];
-    struct sockaddr_in localAddr, servAddr;
+	int sd, rc, i;
+	struct sockaddr_in localAddr, servAddr;
     struct hostent * h;
+	
+	
 
-    //Verification du nombre d'arguments
-    if(argc < 3)
-    {
-        printf("Usage : %s <server> <data1> <data2> ... <dataN>\n", argv[0]);
-        exit(ERROR);
-    }
-
-    h = gethostbyname(argv[1]);
+    h = gethostbyname(adresse_ip);
     if(h == NULL)
     {
-        printf("%s : Uncknow host '%s'", argv[0], argv[1]);
+        printf("%s : Uncknow host '%s'", "Client", adresse_ip);
         exit(ERROR);
     }
 
@@ -59,7 +54,7 @@ int main(int argc, char * argv[])
     //Bind
     if(bind(sd, (struct sockaddr *) &localAddr, sizeof(localAddr)) < 0)
     {
-        printf("%s : cannot bind port TCP %u\n", argv[0], SERVER_PORT);
+        printf("%s : cannot bind port TCP %u\n", "Client", SERVER_PORT);
         perror("Error : ");
         exit(ERROR);
     }
@@ -70,10 +65,39 @@ int main(int argc, char * argv[])
         perror("Cannot connect : ");
         exit(ERROR);
     }
+	
+	return 1;
+}
+
+
+
+
+int se_deconnecter(int sd)
+{
+	printf("Deconnexion du client en cours");
+	close(sd);
+	printf("Deconnexion reussi");
+}
+
+int rejoindre_salon(Salon_t* salon, int joueur)
+{
+	
+}
+
+
+int main(int argc, char * argv[])
+{
+
+    
+    int grille[TAILLE_LIGNE][TAILLE_COLONNE];
+    
+	int co = se_connecter("127.0.0.1");
+	if(co == 1) printf("Connexion ok\n");
+   
 
 
     
-    if(write(sd, argv[2], strlen(argv[2])+1) < 0)
+    /*if(write(sd, argv[2], strlen(argv[2])+1) < 0)
     {
         printf("Cannot send data : ");
         close(sd);
@@ -84,12 +108,9 @@ int main(int argc, char * argv[])
     printf("%s : data %u send (%s)\n", argv[0], i-1, argv[2]);
     
     int couleur;
-    /*read(sd, couleur, sizeof(int));
-    if(couleur == 1) printf("Vous etes le joueur rouge");
-    else printf("Vous etes le joueur jaune");*/
     read(sd, grille, sizeof(int)*TAILLE_COLONNE*TAILLE_LIGNE);
     
-    afficherGrille(grille);
+    afficherGrille(grille);*/
    
 
     return(SUCCESS);
