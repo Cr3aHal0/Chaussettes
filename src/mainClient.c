@@ -29,8 +29,33 @@ int main()
 	printf("\tPourcentage de la partie en cours 86/100\n");
 	
 	
-		
+	printf("Veuillez choisir un numéro de serveur ou tapez 10 pour quitter\n");
+	int choix;
+	scanf("%d", &choix);
 	
+	switch(choix)
+	{
+		int i_case, nb_salon;
+		
+		/*for (i_case = 0; i_case < nb_salon; i_case++)
+		{*/
+			case 1:
+				//Je ne sais pas encore comment on va faire pour determiner la variable joueur
+				//rejoindre_salon(&salon[i_case], joueur);
+				printf("Connexion salon machin\n");
+				break;
+			case 10:
+				//se_deconnecter();
+				printf("Deconnexion du salon\n");
+				break;
+			default:
+				printf("Choix inconnu\n");
+				break;
+		//}
+			
+			
+	}
+}
 
 	
-}
+
