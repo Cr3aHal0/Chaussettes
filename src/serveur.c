@@ -74,6 +74,10 @@ int main(int argc,char *argv[])
 	//Acceptation de la connexion
 		
 			newSd = accept(sd,(struct sockaddr *) &cliAddr,&cliLen);
+
+            //Rejoindre un salon
+            rejoindreSalon(&server, cliAddr.sin_addr, 1);
+
 		    if(newSd<0)
 		    {
 		        perror("Cannot accept connection");
@@ -119,10 +123,38 @@ void chargerSalons(Server *server) {
         server->salons[i] = salon; 
         printf("Salon %d créé\n", i+1);
     }
+
+    server->addr = (struct in_addr *) malloc (NB_SALONS * 2 * sizeof(struct in_addr));
+
+    server->nb_clients = 0;
 }
 
 void freeSalons(Server *server) {
     free(server->salons);
 }
 
+int rejoindreSalon(Server *server, struct in_addr client, int num) {
+    if (num < 1 || num > NB_SALONS) {
+        return 0;
+    }
+    Salon_t salon = server->salons[num-1];
+    if (aJoueur(server, client)) {
+        return 0;
+    }
+    int idJoueur = ajouter_client(&server, client);
+    int retour = ajouter_joueur(&salon, idJoueur); 
+}
 
+int aJoueur(Server server, struct in_addr client) {
+    int indice = -1;
+    int i = 0;
+    while (i < server.nb_clients && client.s_addr != server.addr[i].s_addr) {
+        i++;
+    }
+    return (client.s_addr == server.addr[i].s_addr) ? 1 : 0;
+}
+
+int ajouter_client(Server *server, struct in_addr client) {
+    server->addr[server->nb_clients++] = client;
+    return server->nb_clients-1;
+}

@@ -58,9 +58,9 @@ int placerJeton(int position, int couleur, int matrice[TAILLE_LIGNE][TAILLE_COLO
 	
 }
 
-int is_full(int x)
+int is_full(int matrice[TAILLE_LIGNE][TAILLE_COLONNE], int x)
 {
-	
+	return (matrice[x][0] != 0);
 }
 
 

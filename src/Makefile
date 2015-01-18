@@ -1,8 +1,8 @@
 all: serveur client
 CXXFLAGS = -lpthread
 
-serveur: serveur.c grille.o salon.o
-	gcc serveur.c grille.o -o serveur $(CXXFLAGS)
+serveur: serveur.c grille.o salon.o salon.o
+	gcc serveur.c grille.o salon.o -o serveur $(CXXFLAGS)
 
 client: client.c grille.o salon.o
 	gcc client.c grille.o -o client $(CXXFLAGS)
