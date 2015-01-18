@@ -10,6 +10,7 @@
 #include <errno.h>
 
 //#include "grille.h"
+#include "salon.h"
 #include "client.h"
 
 #define SUCCESS 0
@@ -29,7 +30,7 @@ int se_connecter(char* adresse_ip)
     h = gethostbyname(adresse_ip);
     if(h == NULL)
     {
-        printf("%s : Uncknow host '%s'", "Client", adresse_ip);
+        printf("%s : Unknown host '%s'", "Client", adresse_ip);
         exit(ERROR);
     }
 

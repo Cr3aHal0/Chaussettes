@@ -16,13 +16,10 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "grille.h"
-//#include "salon.h"
-
-
+#include "serveur.h"
 
 #define LOCALHOST "127.0.0.1"
-
+#define NB_SALONS 4
 
 #define SUCCESS 0
 #define ERROR 1
@@ -30,6 +27,9 @@
 
 int main(int argc,char *argv[])
 {
+    
+    Server server;
+    chargerSalons(&server);
 
 	int i, j, k;
 	int couleur;
@@ -96,8 +96,33 @@ int main(int argc,char *argv[])
 
     }
 
+    freeSalons(&server);
+
     return(SUCCESS);
 }
 
+
+void chargerSalons(Server *server) {
+    server->salons = malloc(NB_SALONS * sizeof(Salon_t));
+    int i;
+    for(i = 0; i < NB_SALONS; i++) {
+        Salon_t salon;
+        salon.nb_joueurs = 0;     
+
+        int x, y;
+        for (x = 0; x < TAILLE_LIGNE; x++) {
+            for(y = 0; y < TAILLE_COLONNE; y++) {
+                salon.grille[x][y] = 0;
+            }
+        }
+
+        server->salons[i] = salon; 
+        printf("Salon %d créé\n", i+1);
+    }
+}
+
+void freeSalons(Server *server) {
+    free(server->salons);
+}
 
 

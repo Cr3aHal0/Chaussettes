@@ -59,7 +59,7 @@ void raz_salon(Salon_t* salon)
 }
 
 /* Pour tester la mise en place de salon (petit problèmes d'initialisation)*/
-int main()
+/*int main()
 {
 
 	Salon_t salon;
@@ -74,4 +74,4 @@ int main()
 	raz_salon(&salon);
 	afficher_infos_salon(salon);
 	
-}
+}*/

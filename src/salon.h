@@ -3,11 +3,15 @@
 
 /* Un salon contient une grille, et 2 joueurs */
 
+#define TAILLE_LIGNE 7
+#define TAILLE_COLONNE 6
+
 typedef struct
 {
 	int liste_joueur[2]; 
+    int couleur_joueur[2];
 	int grille[TAILLE_LIGNE][TAILLE_COLONNE];
-	
+	int nb_joueurs;
 } Salon_t;
 
 
