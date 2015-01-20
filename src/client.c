@@ -18,6 +18,20 @@
 #define SERVER_PORT 1500
 #define MAX_MSG 100
 
+/**
+ * Un client peut :
+ * 		Se connecter au serveur
+ * 		Se deconnecter du serveur
+ * 		Voir la liste des salons
+ * 		rejoindre un salon
+ * 		Quitter un salon
+ * 		voir la grille de jeu
+ * 		placer un jeton
+ * 
+ * 
+ * NOTE : Chaque fonction utilise la socket reçu apres la connexion
+ * 	      Possibilité de la mettre en globale pour eviter l'appel systematique dans chaque fonction 
+*/
 
 int se_connecter(char* adresse_ip)
 {
@@ -67,7 +81,7 @@ int se_connecter(char* adresse_ip)
         exit(ERROR);
     }
 	
-	return 1;
+	return sd;
 }
 
 
@@ -80,25 +94,64 @@ int se_deconnecter(int sd)
 	printf("Deconnexion reussi");
 }
 
-int rejoindre_salon(Salon_t* salon, int joueur)
+int rejoindre_salon(int sd, int num_salon)
 {
+	//Envoi du numero de salon au serveur
+	//write(sd, num_salon, sizeof(int));
+}
+
+void afficher_liste_salons(int sd)
+{
+	//reception des infos salon
+}
+
+Couleur get_couleur_from_salon(int sd)
+{
+	//Reception de la couleur attribuée par le salon
+	/*read(sd, couleur, sizeof(int));
+	switch(atoi(couleur))
+	{
+		case 1:
+			printf("Vous etes le joueur ROUGE");
+		case 2:
+			printf("Vous etes le joueur JAUNE");
+		default:
+			printf("Aucune couleur attribuée");
+	}*/
+}
+
+
+//A definir :
+//Est ce que le serveur connait le salon auquel le joueur est associé, ou est ce que le joueur stipule le salon?
+void placer_jeton(int sd, int position_x)
+{
+	//Envoi de la position x de la grille du salon
+	//write(sd, position_x, sizeof(int));
+}
+
+void afficher_grille(int sd)
+{
+	//Reception de la grille, ou juste du rendu (envoi de buffer a reconstruire?)
+	//read(sd, 
 	
 }
 
 
 int main(int argc, char * argv[])
 {
-
+	int couleur;
+	char test[5];
     
     int grille[TAILLE_LIGNE][TAILLE_COLONNE];
     
 	int co = se_connecter("127.0.0.1");
 	if(co == 1) printf("Connexion ok\n");
-   
+	read(co, test, strlen(test)+1);
+	printf("Reception de : %s\n", test);
 
 
     
-    /*if(write(sd, argv[2], strlen(argv[2])+1) < 0)
+   /* if(write(sd, argv[2], strlen(argv[2])+1) < 0)
     {
         printf("Cannot send data : ");
         close(sd);
@@ -111,8 +164,8 @@ int main(int argc, char * argv[])
     int couleur;
     read(sd, grille, sizeof(int)*TAILLE_COLONNE*TAILLE_LIGNE);
     
-    afficherGrille(grille);*/
-   
+    afficherGrille(grille);
+   */
 
     return(SUCCESS);
 }
