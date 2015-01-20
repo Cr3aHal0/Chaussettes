@@ -102,6 +102,18 @@ int main(int argc,char *argv[])
     return(SUCCESS);
 }
 
+int get_nb_salon()
+{
+	return NB_SALONS;
+}
+
+//Retourne un buffer contenant la liste des salons et leur infos
+char* afficher_liste_salons()
+{
+	return NULL;
+	
+}
+
 
 void chargerSalons(Server *server) {
     server->salons = malloc(NB_SALONS * sizeof(Salon_t));
@@ -141,9 +153,9 @@ int rejoindreSalon(Server *server, struct in_addr client, int num) {
         return 0;
     }
     Salon_t salon = server->salons[num-1];
-    if (aJoueur(server, client) >= 0) {
+    /*if (aJoueur(server, client) >= 0) {
         return 0;
-    }
+    }*/
     int idJoueur = ajouter_client(server, client);
     printf("Joueur ajouté au salon %d : %s \n", num, inet_ntoa(client));
         
@@ -151,6 +163,7 @@ int rejoindreSalon(Server *server, struct in_addr client, int num) {
     if (retour < 0) {
         return 0;
     }
+    return 0;
 }
 
 int aJoueur(Server server, struct in_addr client) {
