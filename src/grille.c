@@ -28,6 +28,34 @@ void afficherGrille(Couleur matrice[TAILLE_LIGNE][TAILLE_COLONNE])
 }
 
 
+
+/*
+char* matrix_to_buffer(Couleur matrice[TAILLE_LIGNE][TAILLE_COLONNE])
+{
+	int i, j;
+	char* buffer = (char*)malloc((sizeof(char)*truc)+1);
+	for (i = 0; i < colonne; i++)
+	{
+		//printf(" |");
+		for (j = 0; j < ligne; j++)
+		{	
+			char buffer_i_j[1];
+			strcat(buffer, "|¯");
+			sprintf(buffer_i_j, "%d", matrice[j][i]);
+			strcat(buffer, buffer_i_j);
+			strcat(buffer, "¯");
+		}
+		strcat(buffer, "|\n");
+		
+	}
+	for(i = 0; i < ligne; i++) strcat(buffer, " ¯¯¯");
+	strcat(buffer, "\n");
+	
+	return buffer;
+	
+}*/
+
+
 /* Le joueur ne peut placer son jeton qu'uniquement sur les colonnes, le jeton va descendre si il reste de la place*/
 int placerJeton(int position, Couleur couleur, Couleur matrice[TAILLE_LIGNE][TAILLE_COLONNE])
 {
