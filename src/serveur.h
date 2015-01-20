@@ -10,3 +10,5 @@ typedef struct {
 void chargerSalons(Server*);
 void freeSalons(Server*);
 int rejoindreSalon(Server*, struct in_addr, int);
+int aJoueur(Server server, struct in_addr client);
+int ajouter_client(Server *server, struct in_addr client) ;
