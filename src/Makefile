@@ -7,7 +7,7 @@ serveur: serveur.c grille.o salon.o salon.o
 client: client.c grille.o salon.o
 	gcc client.c grille.o -o client $(CXXFLAGS)
 
-salon.o: salon.c salon.h
+salon.o: salon.c salon.h grille.h
 	gcc -o salon.o -c salon.c
 
 grille.o: grille.c grille.h
