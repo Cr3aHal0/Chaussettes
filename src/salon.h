@@ -9,12 +9,12 @@
 typedef struct
 {
 	int liste_joueur[2]; 
-    int couleur_joueur[2];
-	int grille[TAILLE_LIGNE][TAILLE_COLONNE];
+    Couleur joueur_courant;
+	Couleur grille[TAILLE_LIGNE][TAILLE_COLONNE];
 	int nb_joueurs;
 } Salon_t;
 
 
-int ajouter_joueur(Salon_t * salon, int joueur);
+Couleur ajouter_joueur(Salon_t * salon, int joueur);
 void afficher_infos_salon(Salon_t salon);
 void raz_salon(Salon_t* salon);

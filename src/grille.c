@@ -7,7 +7,7 @@
 
 
 
-void afficherGrille(int matrice[TAILLE_LIGNE][TAILLE_COLONNE])
+void afficherGrille(Couleur matrice[TAILLE_LIGNE][TAILLE_COLONNE])
 {
 	int i, j;
 	for (i = 0; i < TAILLE_COLONNE; i++)
@@ -29,7 +29,7 @@ void afficherGrille(int matrice[TAILLE_LIGNE][TAILLE_COLONNE])
 
 
 /* Le joueur ne peut placer son jeton qu'uniquement sur les colonnes, le jeton va descendre si il reste de la place*/
-int placerJeton(int position, int couleur, int matrice[TAILLE_LIGNE][TAILLE_COLONNE])
+int placerJeton(int position, Couleur couleur, Couleur matrice[TAILLE_LIGNE][TAILLE_COLONNE])
 {
 	if (position < 0 || position > TAILLE_COLONNE)
 	{
@@ -58,15 +58,15 @@ int placerJeton(int position, int couleur, int matrice[TAILLE_LIGNE][TAILLE_COLO
 	
 }
 
-int is_full(int matrice[TAILLE_LIGNE][TAILLE_COLONNE], int x)
+int is_full(Couleur matrice[TAILLE_LIGNE][TAILLE_COLONNE], int x)
 {
-	return (matrice[x][0] != 0);
+	return (matrice[x][0] != BLANC);
 }
 
 
 
 
-int is_win(int grille[TAILLE_LIGNE][TAILLE_COLONNE])
+int is_win(Couleur grille[TAILLE_LIGNE][TAILLE_COLONNE])
 {
 	int y = 0;
 	int x = 0;

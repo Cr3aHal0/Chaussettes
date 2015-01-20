@@ -4,18 +4,18 @@
  * Place des int aleatoires dans le tableau si il n'y a pas eu initialisation
  * */
 
-int ajouter_joueur(Salon_t * salon, int joueur)
+Couleur ajouter_joueur(Salon_t * salon, int joueur)
 {
 	
 	//Si le salon est plein, on refuse la connexion
-	if (salon->liste_joueur[0] != 0 && salon->liste_joueur[1] != 0)
+	if (salon->liste_joueur[0] >= 0 && salon->liste_joueur[1] >= 0)
 	{
 		printf("Impossible de se connecter : Salon plein\n");
 		return -1;
 	}
 	
 	//Si le salon est vide, on attribue la couleur rouge au joueur
-	if (salon->liste_joueur[0] == 0 && salon->liste_joueur[1] == 0) 
+	if (salon->liste_joueur[0] < 0 && salon->liste_joueur[1] < 0) 
 	{
 		salon->liste_joueur[0] = joueur;
 		printf("Couleur attribuée : ROUGE\n");
@@ -43,8 +43,8 @@ void afficher_infos_salon(Salon_t salon)
 
 void raz_salon(Salon_t* salon)
 {
-	salon->liste_joueur[0] = 0;
-	salon->liste_joueur[1] = 0;
+	salon->liste_joueur[0] = -1;
+	salon->liste_joueur[1] = -1;
 	//Pas content avec ça
 	//salon.grille = {0};
 	int i, j;
@@ -53,9 +53,20 @@ void raz_salon(Salon_t* salon)
 	{
 		for (j = 0; j < TAILLE_LIGNE; j++)
 		{	
-			salon->grille[j][i] = 0;
+			salon->grille[j][i] = BLANC;
 		}
 	}	
+}
+
+int is_tour(Salon_t salon, int id_joueur) {
+    int pos = 0;
+    while (pos < 2 && salon.liste_joueur[pos] != id_joueur) {
+        pos++;
+    }
+    if (salon.liste_joueur[pos] != id_joueur) {
+        return -1;
+    }
+    return (pos == salon.joueur_courant);
 }
 
 /* Pour tester la mise en place de salon (petit problèmes d'initialisation)*/
