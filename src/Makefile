@@ -1,5 +1,5 @@
 all: serveur client
-CXXFLAGS = -lpthread
+CXXFLAGS = -lpthread -Wall
 
 serveur: serveur.c grille.o salon.o salon.o
 	gcc serveur.c grille.o salon.o -o serveur $(CXXFLAGS)
