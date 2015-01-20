@@ -1,22 +1,6 @@
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <errno.h>
-
 //#include "grille.h"
-#include "salon.h"
-#include "client.h"
 
-#define SUCCESS 0
-#define ERROR 1
-#define SERVER_PORT 1500
-#define MAX_MSG 100
+#include "client.h"
 
 /**
  * Un client peut :
@@ -30,12 +14,12 @@
  * 
  * 
  * NOTE : Chaque fonction utilise la socket reçu apres la connexion
- * 	      Possibilité de la mettre en globale pour eviter l'appel systematique dans chaque fonction 
+ * 	      Possibilité de la mettre en globale pour eviter l'appel systematique dans chaque fonction ?
 */
 
 int se_connecter(char* adresse_ip)
 {
-	int sd, rc, i;
+	int sd;
 	struct sockaddr_in localAddr, servAddr;
     struct hostent * h;
 	
@@ -87,29 +71,23 @@ int se_connecter(char* adresse_ip)
 
 
 
-int se_deconnecter(int sd)
+void se_deconnecter(int sd)
 {
-	printf("Deconnexion du client en cours");
+	printf("Deconnexion du client en cours...\n");
+	sleep(3);
 	close(sd);
-	printf("Deconnexion reussi");
+	printf("Deconnexion reussi\nA bientôt!\n");
 }
 
-int rejoindre_salon(int sd, int num_salon)
+//Lorsque le joueur rejoint un salon, ce dernier lui attribue une couleur
+Couleur rejoindre_salon(int sd, int num_salon)
 {
 	//Envoi du numero de salon au serveur
-	//write(sd, num_salon, sizeof(int));
-}
-
-void afficher_liste_salons(int sd)
-{
-	//reception des infos salon
-}
-
-Couleur get_couleur_from_salon(int sd)
-{
+	/*write(sd, num_salon, sizeof(int));
+	int couleur;
 	//Reception de la couleur attribuée par le salon
-	/*read(sd, couleur, sizeof(int));
-	switch(atoi(couleur))
+	read(sd, couleur, sizeof(int));
+	switch(couleur)
 	{
 		case 1:
 			printf("Vous etes le joueur ROUGE");
@@ -118,7 +96,17 @@ Couleur get_couleur_from_salon(int sd)
 		default:
 			printf("Aucune couleur attribuée");
 	}*/
+	return 0;
+	
 }
+
+void afficher_liste_salons(int sd)
+{
+	//reception des infos salons sous forme de buffer
+	
+	printf("Affichage des salons :\n");
+}
+
 
 
 //A definir :
@@ -131,43 +119,8 @@ void placer_jeton(int sd, int position_x)
 
 void afficher_grille(int sd)
 {
-	//Reception de la grille, ou juste du rendu (envoi de buffer a reconstruire?)
-	//read(sd, 
+	//Envoi de buffer par le serveur afin de reconstruire la grille
+	int i;
+	//for (i = 0; i
 	
 }
-
-
-int main(int argc, char * argv[])
-{
-	int couleur;
-	char test[5];
-    
-    int grille[TAILLE_LIGNE][TAILLE_COLONNE];
-    
-	int co = se_connecter("127.0.0.1");
-	if(co == 1) printf("Connexion ok\n");
-	read(co, test, strlen(test)+1);
-	printf("Reception de : %s\n", test);
-
-
-    
-   /* if(write(sd, argv[2], strlen(argv[2])+1) < 0)
-    {
-        printf("Cannot send data : ");
-        close(sd);
-        exit(ERROR);
-    }
-	
-	
-    printf("%s : data %u send (%s)\n", argv[0], i-1, argv[2]);
-    
-    int couleur;
-    read(sd, grille, sizeof(int)*TAILLE_COLONNE*TAILLE_LIGNE);
-    
-    afficherGrille(grille);
-   */
-
-    return(SUCCESS);
-}
-
-
