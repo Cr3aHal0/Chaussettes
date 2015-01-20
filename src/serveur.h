@@ -3,7 +3,7 @@
 
 typedef struct {
     Salon_t* salons;
-    struct in_addr* addr;
+    struct in_addr *addr;
     int nb_clients;
 } Server;
 
