@@ -82,20 +82,24 @@ void se_deconnecter(int sd)
 //Lorsque le joueur rejoint un salon, ce dernier lui attribue une couleur
 Couleur rejoindre_salon(int sd, int num_salon)
 {
+	
 	//Envoi du numero de salon au serveur
-	/*write(sd, num_salon, sizeof(int));
+	write(sd, &num_salon, sizeof(int));
 	int couleur;
 	//Reception de la couleur attribuée par le salon
-	read(sd, couleur, sizeof(int));
+	read(sd, &couleur, sizeof(int));
 	switch(couleur)
 	{
 		case 1:
-			printf("Vous etes le joueur ROUGE");
+			printf("Vous etes le joueur ROUGE\n");
+			break;
 		case 2:
-			printf("Vous etes le joueur JAUNE");
+			printf("Vous etes le joueur JAUNE\n");
+			break;
 		default:
-			printf("Aucune couleur attribuée");
-	}*/
+			printf("Aucune couleur attribuée\n");
+			break;
+	}	
 	return 0;
 	
 }
@@ -114,7 +118,7 @@ void afficher_liste_salons(int sd)
 void placer_jeton(int sd, int position_x)
 {
 	//Envoi de la position x de la grille du salon
-	//write(sd, position_x, sizeof(int));
+	write(sd, &position_x, sizeof(int));
 }
 
 void afficher_grille(int sd)
