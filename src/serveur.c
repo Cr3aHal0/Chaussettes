@@ -30,11 +30,7 @@ int main(int argc,char *argv[])
     
     Server server;
     chargerSalons(&server);
-
-	int i, j, k;
-	int couleur;
-	char position[1];
-
+	int position;
     int sd,newSd;
     socklen_t cliLen;
 
@@ -73,8 +69,7 @@ int main(int argc,char *argv[])
 		
 		newSd = accept(sd,(struct sockaddr *) &cliAddr,&cliLen);
 
-        //Rejoindre un salon
-        int couleur = rejoindreSalon(&server, cliAddr.sin_addr, 1);
+        
 
 		if(newSd<0)
 		{
@@ -83,16 +78,27 @@ int main(int argc,char *argv[])
 		}
 		
   
-		//read(newSd, position, sizeof(int));
-		//printf("%s: received from %s:TCP%d : %s \n",argv[0],inet_ntoa(cliAddr.sin_addr),ntohs(cliAddr.sin_port), position);
-			
-		//placerJeton(atoi(position), ROUGE, grille);
-		//afficherGrille(grille);
-		//Envoi de la grille apres que le joueur ai joué
-		char test[5] = "Test";
-		write(newSd, test, strlen(test)+1);
-			
-			
+  
+		//Rejoindre un salon
+		int num = 0;
+		read(newSd, &num, sizeof(int));
+		printf("Numero de salon : %d\n", num);
+        int couleur_joueur = rejoindreSalon(&server, cliAddr.sin_addr, num);
+        //Envoi de la couleur au joueur
+        write(newSd, &couleur_joueur, sizeof(int));
+        
+        
+		
+		//Tant que la partie n'est pas finie
+		int i;
+		for (i = 0; i < 10; i++)
+		{	
+			//On reçoit la position du jeton du joueur
+			read(newSd, &position, sizeof(int));
+			//Le joueur place un jeton
+			placerJeton(position, couleur_joueur, server.salons[num].grille);
+			afficherGrille(server.salons[num].grille);
+		}
         
 
     }
@@ -163,7 +169,7 @@ int rejoindreSalon(Server *server, struct in_addr client, int num) {
     if (retour < 0) {
         return 0;
     }
-    return 0;
+    return retour;
 }
 
 int aJoueur(Server server, struct in_addr client) {
