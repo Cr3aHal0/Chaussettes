@@ -5,16 +5,6 @@
  * 
  **/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <string.h>
 
 #include "serveur.h"
 
@@ -27,7 +17,7 @@
 
 int main(int argc,char *argv[])
 {
-    
+    pthread_t monThreadCompteur;
     Server server;
     chargerSalons(&server);
 	int position;
@@ -90,16 +80,18 @@ int main(int argc,char *argv[])
         
 		
 		//Tant que la partie n'est pas finie
+		//Je mets 10 pour pouvoir tester en dur
 		int i;
-		for (i = 0; i < 10; i++)
-		{	
+		while (is_win(server.salons[num].grille) == 0)
+		{
 			//On reçoit la position du jeton du joueur
 			read(newSd, &position, sizeof(int));
 			//Le joueur place un jeton
 			placerJeton(position, couleur_joueur, server.salons[num].grille);
 			afficherGrille(server.salons[num].grille);
 		}
-        
+		printf("Le joueur %d a gagné!\n", is_win(server.salons[num].grille));
+		//Il faudrait kick les joueurs du salon quand on remet a 0 celui ci
 
     }
 
@@ -186,3 +178,11 @@ int ajouter_client(Server *server, struct in_addr client) {
     //printf("Nombre de clients après opération : %d \n", server->nb_clients);
     return server->nb_clients-1;
 }
+
+
+//Fonction permettant de kill le processus, ou fermer le port (a voir) lorsqu'on ferme le serveur (CTRL+C)
+void handler_arret(int sig_num)
+{
+	
+}
+
