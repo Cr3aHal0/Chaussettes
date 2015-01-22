@@ -7,6 +7,7 @@
 
 
 #include "serveur.h"
+#include "message.h"
 
 #define LOCALHOST "127.0.0.1"
 #define NB_SALONS 4
@@ -20,12 +21,26 @@ int main(int argc,char *argv[])
     pthread_t monThreadCompteur;
     Server server;
     chargerSalons(&server);
+
 	int position;
     int sd,newSd;
     socklen_t cliLen;
 
     struct sockaddr_in cliAddr, servAddr;
 
+    /* TEST PURPOSE :
+    
+    Message m;
+    m.action = 1;
+    m.salon = 2;
+    m.joueur = 0;
+    m.x = 5;
+
+    char* mes = toString(&m);
+    printf("message : %s \n", mes);
+    
+    Message *message = fromString(mes);
+    */
 
     //Creation de la socket
     sd = socket(AF_INET,SOCK_STREAM,0);
@@ -59,15 +74,11 @@ int main(int argc,char *argv[])
 		
 		newSd = accept(sd,(struct sockaddr *) &cliAddr,&cliLen);
 
-        
-
 		if(newSd<0)
 		{
 		    perror("Cannot accept connection");
 		    exit(ERROR);
 		}
-		
-  
   
 		//Rejoindre un salon
 		int num = 0;
@@ -75,9 +86,7 @@ int main(int argc,char *argv[])
 		printf("Numero de salon : %d\n", num);
         int couleur_joueur = rejoindreSalon(&server, cliAddr.sin_addr, num);
         //Envoi de la couleur au joueur
-        write(newSd, &couleur_joueur, sizeof(int));
-        
-        
+        write(newSd, &couleur_joueur, sizeof(int));        
 		
 		//Tant que la partie n'est pas finie
 		//Je mets 10 pour pouvoir tester en dur
@@ -151,6 +160,7 @@ int rejoindreSalon(Server *server, struct in_addr client, int num) {
         return 0;
     }
     Salon_t salon = server->salons[num-1];
+
     /*if (aJoueur(server, client) >= 0) {
         return 0;
     }*/
@@ -161,6 +171,7 @@ int rejoindreSalon(Server *server, struct in_addr client, int num) {
     if (retour < 0) {
         return 0;
     }
+
     return retour;
 }
 

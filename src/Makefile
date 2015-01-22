@@ -4,11 +4,11 @@ CXXFLAGS = -lpthread -Wall
 mainClient: mainClient.c client.o
 	gcc mainClient.c client.o -o mainClient $(CXXFLAGS)
 
-serveur: serveur.c grille.o salon.o
-	gcc serveur.c grille.o salon.o -o serveur $(CXXFLAGS)
+serveur: serveur.c grille.o salon.o message.c
+	gcc serveur.c message.c grille.o salon.o -o serveur $(CXXFLAGS)
 
-client.o: client.c client.h salon.h
-	gcc -o client.o -c client.c
+client.o: client.c client.h salon.h message.c
+	gcc -c client.c -o client.o
 
 salon.o: salon.c salon.h grille.h
 	gcc -o salon.o -c salon.c

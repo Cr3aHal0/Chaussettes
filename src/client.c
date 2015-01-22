@@ -111,8 +111,6 @@ void afficher_liste_salons(int sd)
 	printf("Affichage des salons :\n");
 }
 
-
-
 //A definir :
 void placer_jeton(int sd, int position_x)
 {
