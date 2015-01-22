@@ -114,11 +114,16 @@ void afficher_liste_salons(int sd)
 
 
 //A definir :
-//Est ce que le serveur connait le salon auquel le joueur est associé, ou est ce que le joueur stipule le salon?
 void placer_jeton(int sd, int position_x)
 {
 	//Envoi de la position x de la grille du salon
-	write(sd, &position_x, sizeof(int));
+	/*if (!isdigit(position_x)){
+		printf("Position inconnue");
+	}
+	else
+	{*/
+		write(sd, &position_x, sizeof(int));
+	//}
 }
 
 void afficher_grille(int sd)
