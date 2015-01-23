@@ -61,6 +61,7 @@ int main()
 	
 	//Tant que la partie n'est pas finie
 	int i;
+	
 	for (i = 0; i < 10; i++)
 	{
 		//Une fois que le joueur est connecté, on lui affiche la grille pour chaque fois ou un jeton est placé

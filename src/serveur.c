@@ -73,7 +73,7 @@ int main(int argc,char *argv[])
 		//Acceptation de la connexion
 		
 		newSd = accept(sd,(struct sockaddr *) &cliAddr,&cliLen);
-
+		
 		if(newSd<0)
 		{
 		    perror("Cannot accept connection");

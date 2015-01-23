@@ -9,13 +9,12 @@
 #include <sys/wait.h>
 #include <netdb.h>
 
-#include "salon.h"
+#include "grille.h"
 
 #define ERROR 0
 #define SUCCESS 1
 #define SERVER_PORT 1500
 #define MAX_MSG 100
-
 
 int se_connecter(char* adresse_ip);
 void se_deconnecter(int sd);

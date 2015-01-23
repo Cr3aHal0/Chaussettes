@@ -17,6 +17,10 @@
  * 	      Possibilité de la mettre en globale pour eviter l'appel systematique dans chaque fonction ?
 */
 
+
+
+
+
 int se_connecter(char* adresse_ip)
 {
 	int sd;
@@ -115,13 +119,13 @@ void afficher_liste_salons(int sd)
 void placer_jeton(int sd, int position_x)
 {
 	//Envoi de la position x de la grille du salon
-	/*if (!isdigit(position_x)){
-		printf("Position inconnue");
+	if (isdigit(position_x)){
+		printf("Position inconnue\n");
 	}
 	else
-	{*/
+	{
 		write(sd, &position_x, sizeof(int));
-	//}
+	}
 }
 
 void afficher_grille(int sd)
