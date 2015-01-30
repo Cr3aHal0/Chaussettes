@@ -19,7 +19,6 @@ int main()
 	afficher_liste_salons(sd);
 	//int nb_salons = get_nb_salon();
 	
-	
 	printf("Veuillez choisir un numéro de salon ou tapez 0 pour quitter\n");
 	int choix;
 	scanf("%d", &choix);
