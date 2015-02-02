@@ -75,12 +75,12 @@ int main(int argc,char *argv[])
 		    exit(ERROR);
 		}
 		
-		Client client;
-		client.sd = newSd;
-		client.addr = cliAddr;
-		client.server = server;
+		Client *client = malloc(sizeof(Client));
+		client->sd = newSd;
+		client->addr = cliAddr;
+		client->server = server;
 		
-		if(pthread_create(&thread , NULL , connection_handler , (void*) &client) < 0)
+		if(pthread_create(&thread , NULL , connection_handler , (void*) client) < 0)
 		{
 			perror("could not create thread");
 			return 1;
@@ -89,34 +89,6 @@ int main(int argc,char *argv[])
 		{
 			printf("Thread créé avec succès \n");
 		}
-
-        
-  
-		/*
-		//Envoi buffer liste salon
-		//write(newSd, &)
-		//Rejoindre un salon
-		int num = 0;
-		read(newSd, &num, sizeof(int));
-		printf("Numero de salon : %d\n", num);
-        int couleur_joueur = rejoindreSalon(&server, cliAddr.sin_addr, num);
-        //Envoi de la couleur au joueur
-        write(newSd, &couleur_joueur, sizeof(int));        
-		
-		//Tant que la partie n'est pas finie
-		//Je mets 10 pour pouvoir tester en dur
-		int i;
-		while (is_win(server.salons[num].grille) == 0)
-		{
-			//On reçoit la position du jeton du joueur
-			read(newSd, &position, sizeof(int));
-			//Le joueur place un jeton
-			placerJeton(position, couleur_joueur, server.salons[num].grille);
-			afficherGrille(server.salons[num].grille);
-		}
-		printf("Le joueur %d a gagné!\n", is_win(server.salons[num].grille));
-		//Il faudrait kick les joueurs du salon quand on remet a 0 celui ci
-		*/
     }
 
     freeSalons(&server);
@@ -138,19 +110,20 @@ char* afficher_liste_salons()
 
 void *connection_handler(void *client)
 {
-	Client connection = *(Client*)client;
-	
+	Client *connection = (Client*)client;
+
 	while (1) {
-		//Envoi buffer liste salon
-		//write(newSd, &)
 		//Rejoindre un salon
 		int num = 0;
-		read(connection.sd, &num, sizeof(int));
+		read(connection->sd, &num, sizeof(int));
 		printf("Numero de salon : %d\n", num);
-        int couleur_joueur = rejoindreSalon(&connection.server, connection.addr.sin_addr, num);
+
+        int couleur_joueur = rejoindreSalon(&connection->server, connection, num);
         printf("Couleur %d\n", couleur_joueur);
+
         //Envoi de la couleur au joueur
-        write(connection.sd, &couleur_joueur, sizeof(int));        			
+        write(connection->sd, &couleur_joueur, sizeof(int));
+		printf("Canal rejoint : %d\n", connection->sd);        			
 	}
 	
 	 //Send some messages to the client
@@ -168,30 +141,30 @@ void *gestion_salon(void *salon) {
 	//Tant que le thread est en vie
 	while(1) {
 		
-		while (lobby->nb_joueurs != 2) {
-			printf("[%d] Waiting for %d people to join ... \n", lobby->id, (lobby->nb_joueurs));
-			sleep(2);
+		while (lobby->nb_joueurs < 2) {
+			printf("[%d] Waiting for %d people to join ... \n", lobby->id, (2-lobby->nb_joueurs));
+			notifierJoueurs(lobby, 0);
+			sleep(1);
 		}
 		
+		notifierJoueurs(lobby, 1);
+
 		while (!is_win(lobby->grille)) {
-			printf("Partie toujours en cours");
+			printf("[%d] Partie toujours en cours\n", lobby->id);
 			
-			//Tant que la partie n'est pas finie
-			//Je mets 10 pour pouvoir tester en dur
-			while (is_win(lobby->grille) == 0)
-			{
 				/*//On reçoit la position du jeton du joueur
 				read(newSd, &position, sizeof(int));
 				//Le joueur place un jeton
 				placerJeton(position, couleur_joueur, server.salons[num].grille);
 				afficherGrille(server.salons[num].grille);*/
 				
-				sleep(5);
-			}
-			printf("Le joueur %d a gagné!\n", is_win(lobby->grille));
+			sleep(5);
 			//Il faudrait kick les joueurs du salon quand on remet a 0 celui ci
 		}
 		
+		printf("Le joueur %d a gagné!\n", is_win(lobby->grille));
+		//TODO : Il faudrait kick les joueurs du salon quand on remet a 0 celui ci
+
 	}
 	
 	return NULL;
@@ -201,27 +174,32 @@ void chargerSalons(Server *server) {
     server->salons = malloc(NB_SALONS * sizeof(Salon_t));
     int i;
     for(i = 0; i < NB_SALONS; i++) {
-        Salon_t salon;
-        salon.id = i;
-        salon.nb_joueurs = 0;     
-        salon.joueur_courant = -1;
-        salon.liste_joueur[0] = -1;
-        salon.liste_joueur[1] = -1;
+        Salon_t *salon = malloc(sizeof(*salon));
+        salon->id = i;
+        salon->nb_joueurs = 0;     
+        salon->joueur_courant = -1;
+        salon->liste_joueur[0] = -1;
+        salon->liste_joueur[1] = -1;
+		salon->sockets_id[0] = 0;
+		salon->sockets_id[1] = 0;
+		salon->nb_sockets = 0;
+		salon->nb_threads = 0;
+		salon->threads_joueurs = malloc(2*sizeof(pthread_t));
 		
         int x, y;
         for (x = 0; x < TAILLE_LIGNE; x++) {
             for(y = 0; y < TAILLE_COLONNE; y++) {
-                salon.grille[x][y] = 0;
+                salon->grille[x][y] = 0;
             }
         }
 
 		pthread_t threadsalon;
-		if(pthread_create(&threadsalon , NULL , gestion_salon , (void*) &salon) < 0)
+		if(pthread_create(&threadsalon , NULL , gestion_salon , (void*) salon) < 0)
 		{
 			printf("[ERROR] Could not create thread for lobby #%d", i);
 		}
 		
-		salon.thread_salon = threadsalon;
+		salon->thread_salon = threadsalon;
 		
         server->salons[i] = salon; 
         printf("Salon %d créé\n", i+1);
@@ -238,30 +216,64 @@ void chargerSalons(Server *server) {
 void freeSalons(Server *server) {
 	int i;
 	for (i=0; i<NB_SALONS; i++) {
-		pthread_join(server->salons[i].thread_salon, 0);
+		pthread_join(server->salons[i]->thread_salon, 0);
 	}
     free(server->salons);
 }
 
-int rejoindreSalon(Server *server, struct in_addr client, int num) {
+int rejoindreSalon(Server *server, Client *client, int num) {
     if (num < 1 || num > NB_SALONS) {
         return 0;
     }
-    Salon_t salon = server->salons[num-1];
+    Salon_t *salon = server->salons[num-1];
 
     /*if (aJoueur(server, client) >= 0) {
         return 0;
     }*/
-    int idJoueur = ajouter_client(server, client);
-    printf("Joueur ajouté au salon %d : %s \n", num, inet_ntoa(client));
+    int idJoueur = ajouter_client(server, client->addr.sin_addr);
+    printf("Joueur ajouté au salon %d par le slot %d : %s \n", num, client->sd, inet_ntoa(client->addr.sin_addr));
         
-    int retour = ajouter_joueur(&salon, idJoueur); 
+    int retour = ajouter_joueur(salon, client->sd, idJoueur); 
     if (retour < 0) {
         return 0;
-    }
+    }	
+
+	pthread_t thread;
+	Joueur_t *joueur = malloc(sizeof(*joueur));;
+	joueur->slot = client->sd;
+	joueur->salon = salon;
+
+	//printf("Slot à réserver : %d\n", client->sd);
+	if(pthread_create(&thread , NULL , gestion_joueur , (void*) joueur) < 0)
+	{
+		printf("[ERROR] Could not create thread for client on slot #%d \n", client->sd);
+	}
+	salon->threads_joueurs[salon->nb_threads++] = &thread;
 
     return retour;
 }
+
+void *gestion_joueur(void *data) {
+	Joueur_t *joueur = (Joueur_t*)data;
+	printf("Slot occupé : %d\n", joueur->slot);
+
+	//Tant que le thread est en vie
+	while(1) {
+
+		if (joueur->salon->nb_joueurs == 2) {
+			Message m;
+			m.action = 10;
+			char* buf = toString(&m);
+			write(joueur->slot, buf, TAILLE_MAX * sizeof(char));
+			//printf("Message notifié : %s\n", buf);
+			sleep(2);
+		}
+
+	}
+	
+	return NULL;
+}
+
 
 int aJoueur(Server server, struct in_addr client) {
     int i = 0;

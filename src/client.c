@@ -80,7 +80,7 @@ void se_deconnecter(int sd)
 	printf("Deconnexion du client en cours...\n");
 	sleep(3);
 	close(sd);
-	printf("Deconnexion reussi\nA bientôt!\n");
+	printf("Deconnexion reussie\nA bientôt!\n");
 }
 
 //Lorsque le joueur rejoint un salon, ce dernier lui attribue une couleur
@@ -104,7 +104,7 @@ Couleur rejoindre_salon(int sd, int num_salon)
 			printf("Aucune couleur attribuée\n");
 			break;
 	}	
-	return 0;
+	return couleur;
 	
 }
 
@@ -134,4 +134,19 @@ void afficher_grille(int sd)
 	int i;
 	//for (i = 0; i
 	
+}
+
+int partie_commencee(int sd, int choix) {
+    int i;
+    read(sd, &i, sizeof(int));
+	//printf("Statut reçu : %d\n", i);
+    return (i==1) ? 1 : 0;
+}
+
+int partie_terminee(int sd) {
+	char* buf = malloc(TAILLE_MAX * sizeof(char));
+	read(sd, buf, TAILLE_MAX * sizeof(char));
+	//printf("Message reçu : %s\n", buf);
+	Message *message = fromString(buf);
+	return message->action;
 }

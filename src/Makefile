@@ -1,20 +1,20 @@
 all: serveur mainClient
 CXXFLAGS = -lpthread -Wall
 
-mainClient: mainClient.c client.o grille.o
-	gcc mainClient.c client.o grille.o -o mainClient $(CXXFLAGS)
+mainClient: mainClient.c client.o grille.o message.o
+	gcc mainClient.c client.o grille.o message.o -o $@ $(CXXFLAGS)
 
-serveur: serveur.c grille.o salon.o message.c
-	gcc serveur.c message.c grille.o salon.o -o serveur $(CXXFLAGS)
+serveur: serveur.c grille.o salon.o message.o
+	gcc serveur.c grille.o salon.o message.o -o $@ $(CXXFLAGS)
 
-client.o: client.c client.h grille.h message.c
-	gcc -c client.c -o client.o
+client.o: client.c client.h grille.h message.o
+	gcc -c client.c message.o -o $@
 
 salon.o: salon.c salon.h grille.h
-	gcc -o salon.o -c salon.c
+	gcc -o $@ -c salon.c
 
 grille.o: grille.c grille.h
-	gcc -o grille.o -c grille.c
+	gcc -o $@ -c grille.c
 
 clean: 
 	rm -rf serveur mainClient *.o	

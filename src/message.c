@@ -4,8 +4,6 @@
 #include <string.h>
 #include <stdio.h>
 
-#define TAILLE_MAX 1000
-
 char* toString(Message *message) {
     char* buff = (char *) malloc(TAILLE_MAX * sizeof(char));
     char* truc = (char *) malloc(2 * sizeof(char));

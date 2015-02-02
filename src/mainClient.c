@@ -19,47 +19,65 @@ int main()
 	afficher_liste_salons(sd);
 	//int nb_salons = get_nb_salon();
 	
-	printf("Veuillez choisir un numéro de salon ou tapez 0 pour quitter\n");
 	int choix;
-	scanf("%d", &choix);
-	//Possibilité de faire ça avec un for?
-	switch(choix)
-	{
-
-		
-			case 1:
-				rejoindre_salon(sd, 1);
-				printf("Connexion au salon n°1\n");
-				break;
-			
-			case 2:
-				rejoindre_salon(sd, 2);
-				printf("Connexion au salon n°2\n");
-				break;	
-				
-			case 3:
-				rejoindre_salon(sd, 1);
-				printf("Connexion au salon n°1\n");
-				break;
-			
-			case 4:
-				rejoindre_salon(sd, 2);
-				printf("Connexion au salon n°2\n");
-				break;	
-					
-			case 0:
-				se_deconnecter(sd);
-				break;
-				
-			default:
-				printf("Choix inconnu\n");
-				break;
-			
-			
-	}
+    do {
+	    printf("Veuillez choisir un numéro de salon ou tapez 0 pour quitter\n");
+	    scanf("%d", &choix);			
+	}while (choix < 0 && choix > 4);
 	
+
+    if (choix == 0) {
+        se_deconnecter(sd);
+        exit(1);
+    }
+
+	Couleur couleur = rejoindre_salon(sd, choix);
+	printf("Connexion au salon n°%d avec la couleur %d\n", choix, couleur);
+
+	if (couleur == 0) {
+		printf("Erreur, impossible de rejoindre le salon\n");
+		exit(1);
+	}
+
+	if (couleur == ROUGE) {
+		int commencee = 0;
+		printf("En attente d'un autre joueur...\n");
+		while (commencee == 0) {
+			commencee = partie_commencee(sd, choix);
+		}
+		printf("Un deuxième joueur à rejoint la salle !\n");
+	}
+	else {
+		printf("La partie est sur le point de commencer !\n");
+	}
+
+	int end = 0;
+	while (end == 0) {
+		printf("Partie en cours...\n");
+		int i = partie_terminee(sd);
+
+		switch(i) {
+			//Partie remportée par un joueur
+			case PLAYER_WIN:
+
+			break;
+
+			//Tour d'un joueur
+			case PLAYER_TURN:
+
+			break;
+
+			//Un joueur pose un jeton
+			case PLAYER_PUT_TOKEN:
+
+			break;
+		}
+
+		sleep(4);
+	}
+
 	//Tant que la partie n'est pas finie
-	int i;
+	/*int i;
 	
 	for (i = 0; i < 10; i++)
 	{
@@ -68,7 +86,7 @@ int main()
 		printf("Position du jeton à placer\n");
 		scanf("%d", &position);
 		placer_jeton(sd, position);
-	}
+	}*/
 	
 	
 	return 0;

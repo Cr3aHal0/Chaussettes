@@ -103,7 +103,7 @@ int is_win(Couleur grille[TAILLE_LIGNE][TAILLE_COLONNE])
 }
 
 
-Couleur ajouter_joueur(Salon_t * salon, int joueur)
+Couleur ajouter_joueur(Salon_t * salon, int socketslot, int joueur)
 {
 	
 	//Si le salon est plein, on refuse la connexion
@@ -112,6 +112,10 @@ Couleur ajouter_joueur(Salon_t * salon, int joueur)
 		printf("Impossible de se connecter : Salon plein\n");
 		return -1;
 	}
+	
+    salon->nb_joueurs++;
+	salon->sockets_id[salon->nb_sockets] = socketslot;
+	salon->nb_sockets++;
 	
 	//Si le salon est vide, on attribue la couleur rouge au joueur
 	if (salon->liste_joueur[0] < 0 && salon->liste_joueur[1] < 0) 
@@ -166,6 +170,14 @@ int is_tour(Salon_t salon, int id_joueur) {
         return -1;
     }
     return (pos == salon.joueur_courant);
+}
+
+void notifierJoueurs(Salon_t *salon, int statut) {
+	int i;
+	for (i = 0; i < salon->nb_sockets; i++) {
+		printf("Statut notifié : %d au socket %d \n", statut, salon->sockets_id[i]);
+		write(salon->sockets_id[i], &statut, sizeof(int));
+	} 
 }
 
 /* Pour tester la mise en place de salon (petit problèmes d'initialisation)*/
