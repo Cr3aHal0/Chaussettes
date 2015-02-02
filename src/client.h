@@ -24,5 +24,5 @@ Couleur rejoindre_salon(int sd, int num_salon);
 void placer_jeton(int sd, int position_x);
 void afficher_grille(int sd);
 int partie_commencee(int sd, int choix);
-int partie_terminee(int sd);
+Message* get_signal(int sd);
 

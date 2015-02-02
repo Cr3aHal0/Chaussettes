@@ -142,7 +142,7 @@ void *gestion_salon(void *salon) {
 	while(1) {
 		
 		while (lobby->nb_joueurs < 2) {
-			printf("[%d] Waiting for %d people to join ... \n", lobby->id, (2-lobby->nb_joueurs));
+			//printf("[%d] Waiting for %d people to join ... \n", lobby->id, (2-lobby->nb_joueurs));
 			notifierJoueurs(lobby, 0);
 			sleep(1);
 		}
@@ -257,16 +257,22 @@ void *gestion_joueur(void *data) {
 	Joueur_t *joueur = (Joueur_t*)data;
 	printf("Slot occupé : %d\n", joueur->slot);
 
+	int start = 0;
 	//Tant que le thread est en vie
 	while(1) {
 
-		if (joueur->salon->nb_joueurs == 2) {
+		if (joueur->salon->nb_joueurs == 2 && start == 0) {
 			Message m;
-			m.action = 10;
+			m.action = GAME_START;
 			char* buf = toString(&m);
 			write(joueur->slot, buf, TAILLE_MAX * sizeof(char));
+			start = 1;
 			//printf("Message notifié : %s\n", buf);
 			sleep(2);
+		}
+
+		while (start == 1) {
+			sleep(1);
 		}
 
 	}

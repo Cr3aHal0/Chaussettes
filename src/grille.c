@@ -27,7 +27,15 @@ void afficherGrille(Couleur matrice[TAILLE_LIGNE][TAILLE_COLONNE])
 	
 }
 
-
+void initGrille(Couleur matrice[TAILLE_LIGNE][TAILLE_COLONNE])
+{
+    int x, y;
+    for (x = 0; x < TAILLE_LIGNE; x++) {
+        for(y = 0; y < TAILLE_COLONNE; y++) {
+        	matrice[x][y] = 0;
+        }
+    }
+}
 
 /*
 char* matrix_to_buffer(Couleur matrice[TAILLE_LIGNE][TAILLE_COLONNE])

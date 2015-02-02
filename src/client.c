@@ -143,10 +143,9 @@ int partie_commencee(int sd, int choix) {
     return (i==1) ? 1 : 0;
 }
 
-int partie_terminee(int sd) {
+Message* get_signal(int sd) {
 	char* buf = malloc(TAILLE_MAX * sizeof(char));
 	read(sd, buf, TAILLE_MAX * sizeof(char));
 	//printf("Message reçu : %s\n", buf);
-	Message *message = fromString(buf);
-	return message->action;
+	return fromString(buf);
 }

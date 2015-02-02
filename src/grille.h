@@ -4,8 +4,5 @@
 
 typedef enum  Couleur {BLANC, ROUGE, JAUNE} Couleur;
 
-
-
-
 void afficherGrille(Couleur matrice[TAILLE_LIGNE][TAILLE_COLONNE]);
-
+void initGrille(Couleur matrice[TAILLE_LIGNE][TAILLE_COLONNE]);

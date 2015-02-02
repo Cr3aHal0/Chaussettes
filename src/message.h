@@ -10,9 +10,10 @@ typedef struct
 } Message;
 
 typedef enum  Action {
-	PLAYER_TURN = 0,
-	PLAYER_PUT_TOKEN = 1,
-	PLAYER_WIN = 2
+	GAME_START = 0,
+	PLAYER_TURN = 1,
+	PLAYER_PUT_TOKEN = 2,
+	PLAYER_WIN = 3
 } Action;
 
 char* toString(Message*);
