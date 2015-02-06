@@ -5,7 +5,7 @@ typedef struct
     int length;
     int action;
 	int salon;
-	int joueur;
+	int couleur;
     int x;
 } Message;
 

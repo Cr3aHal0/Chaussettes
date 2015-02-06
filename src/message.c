@@ -21,9 +21,9 @@ char* toString(Message *message) {
         strcat(buff, truc);
         strcat(buff, ";");
     }
-    if (message->joueur != -1) {
+    if (message->couleur != -1) {
         strcat(buff, "joueur=");
-        sprintf(truc, "%d", message->joueur);
+        sprintf(truc, "%d", message->couleur);
         strcat(buff, truc);
         strcat(buff, ";");
     }
@@ -95,8 +95,8 @@ Message* fromString(char* message) {
                     if (!strcmp(truc, "salon")) {
                         mes->salon = atoi(valeurs);
                     }
-                    else if (!strcmp(truc, "joueur")) {
-                        mes->joueur = atoi(valeurs);
+                    else if (!strcmp(truc, "couleur")) {
+                        mes->couleur = atoi(valeurs);
                     }
                     else if (!strcmp(truc, "x")) {
                         mes->x = atoi(valeurs);

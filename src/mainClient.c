@@ -52,44 +52,47 @@ int main()
 	}
 
 	int end = 0;
+	int waiting = 1;
 	Couleur grille[TAILLE_LIGNE][TAILLE_COLONNE];
-
+	int x;
 	while (end == 0) {
 		printf("Partie en cours...\n");
 		Message* signal = get_signal(sd);
 
-		switch(signal->action) {
-			//Début de partie
-			case GAME_START:
-				printf("La partie commence !!!\n");
-				initGrille(grille);
-				afficherGrille(grille);
-			break;
+		if (signal != NULL) {
+			switch(signal->action) {
+				//Début de partie
+				case GAME_START:
+					printf("La partie commence !!!\n");
+					initGrille(grille);
+					afficherGrille(grille);
+				break;
 
-			//Partie remportée par un joueur
-			case PLAYER_WIN:
-				end = 1;
-				printf("Partie terminé : victoire du joueur %d\n", signal->joueur);
-			break;
+				//Partie remportée par un joueur
+				case PLAYER_WIN:
+					end = 1;
+					printf("Partie terminé : victoire du joueur %d\n", signal->couleur);
+				break;
 
-			//Tour d'un joueur
-			case PLAYER_TURN:
+				//Tour d'un joueur
+				case PLAYER_TURN:
+					if (signal->couleur == couleur) {
+						waiting = 0;
+					}
+				break;
 
-			break;
+				//Un joueur pose un jeton
+				case PLAYER_PUT_TOKEN:
+					x = signal->x;
+				break;
 
-			//Un joueur pose un jeton
-			case PLAYER_PUT_TOKEN:
+				default:
 
-			break;
-
-			default:
-
-			break;
+				break;
+			}
 		}
-
 		sleep(4);
 	}
-
 	//Tant que la partie n'est pas finie
 	/*int i;
 	
