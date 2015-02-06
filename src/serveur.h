@@ -10,7 +10,7 @@
 #include <string.h>
 
 #include "salon.h"
-
+#include "message.h"
 
 typedef struct {
     Salon_t* *salons;
@@ -33,3 +33,6 @@ int ajouter_client(Server *server, struct in_addr client) ;
 void *connection_handler(void *client);
 void *gestion_salon(void *salon);
 void *gestion_joueur(void *sd);
+
+void diffuserMessage(Salon_t *salon, Message *message);
+void envoyerMessageJoueur(int slot, Message *message);

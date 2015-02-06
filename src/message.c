@@ -39,6 +39,11 @@ char* toString(Message *message) {
     return buff;
 }
 
+char* reserver() {
+	char* buffer = (char*) malloc(TAILLE_MAX * sizeof(char));
+	return buffer;
+}
+
 Message* fromString(char* message) {
     Message *mes = malloc(sizeof(*mes));
     mes->x = -1;

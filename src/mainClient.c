@@ -52,12 +52,12 @@ int main()
 	}
 
 	int end = 0;
+	int x;
 	int waiting = 1;
 	Couleur grille[TAILLE_LIGNE][TAILLE_COLONNE];
-	int x;
 	while (end == 0) {
 		printf("Partie en cours...\n");
-		Message* signal = get_signal(sd);
+		Message *signal = get_signal(sd);
 
 		if (signal != NULL) {
 			switch(signal->action) {
@@ -79,11 +79,37 @@ int main()
 					if (signal->couleur == couleur) {
 						waiting = 0;
 					}
+					if (waiting == 0) {
+						int fail = 1;
+						while (fail == 1 ) {
+							printf("Dans quelle colonne souhaitez-vous  ajouter un pion ?\n");
+							scanf("%d", &x);
+
+							Message m;
+							m.action = PLAYER_PUT_TOKEN;
+							m.couleur = couleur;
+							m.x = x;
+							write(sd, toString(&m), TAILLE_MAX * sizeof(char));
+
+							//Waiting for a response
+							Message* ret = get_signal(sd);
+						 	if (ret->action == TOKEN_ERROR) {
+								printf("U SUCK : FULL OR INCORRECT COLUMN BITCH\n");
+							}
+							else
+							{
+								fail = 0;
+							}
+						}
+					}
 				break;
 
 				//Un joueur pose un jeton
 				case PLAYER_PUT_TOKEN:
-					x = signal->x;
+					placerJeton(signal->x, signal->couleur, grille);
+					if (signal->couleur == couleur) {
+						waiting = 1;
+					}
 				break;
 
 				default:

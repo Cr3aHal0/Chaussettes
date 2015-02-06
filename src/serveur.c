@@ -7,7 +7,6 @@
 
 
 #include "serveur.h"
-#include "message.h"
 
 #define LOCALHOST "127.0.0.1"
 #define NB_SALONS 4
@@ -149,6 +148,14 @@ void *gestion_salon(void *salon) {
 		
 		notifierJoueurs(lobby, 1);
 
+		Message *m = malloc(sizeof(*m));
+		m->salon = -1;
+		m->x = -1;
+		m->action = PLAYER_TURN;
+		m->couleur = ROUGE;
+
+		diffuserMessage(lobby, m);
+
 		while (!is_win(lobby->grille)) {
 			printf("[%d] Partie toujours en cours\n", lobby->id);
 			
@@ -257,6 +264,7 @@ void *gestion_joueur(void *data) {
 	Joueur_t *joueur = (Joueur_t*)data;
 	printf("Slot occupé : %d\n", joueur->slot);
 
+	char* buffer = reserver();
 	int start = 0;
 	//Tant que le thread est en vie
 	while(1) {
@@ -272,7 +280,32 @@ void *gestion_joueur(void *data) {
 		}
 
 		while (start == 1) {
-			sleep(1);
+			read(joueur->slot, buffer, TAILLE_MAX * sizeof(char));
+			printf("Message reçu : %s \n", buffer);
+			int retour;
+
+			Message *message = fromString(buffer);
+			switch (message->action) {
+				//Un joueur pose un jeton
+				case PLAYER_PUT_TOKEN:
+					retour = placerJeton(message->x, message->couleur, joueur->salon->grille);
+					Message m;
+					if (retour == 1) {
+						//Okay dude
+						
+						m.action = PLAYER_PUT_TOKEN;
+						m.x = message->x;
+						m.couleur = message->couleur;
+
+						diffuserMessage(joueur->salon, &m);
+					}
+					else
+					{
+						m.action = TOKEN_ERROR;
+						envoyerMessageJoueur(joueur->slot,&m);
+					}
+				break;
+			}
 		}
 
 	}
@@ -296,6 +329,18 @@ int ajouter_client(Server *server, struct in_addr client) {
     return server->nb_clients-1;
 }
 
+void diffuserMessage(Salon_t *salon, Message *message) {
+	int i;
+	for (i = 0; i < salon->nb_sockets; i++) {
+		char *buffer = toString(message);
+		printf("Message notifié au socket %d : %s \n", salon->sockets_id[i], buffer);
+		write(salon->sockets_id[i], buffer, TAILLE_MAX * sizeof(char));
+	}
+}
+
+void envoyerMessageJoueur(int slot, Message *message) {
+	write(slot, toString(message), TAILLE_MAX * sizeof(char));
+}
 
 //Fonction permettant de kill le processus, ou fermer le port (a voir) lorsqu'on ferme le serveur (CTRL+C)
 void handler_arret(int sig_num)

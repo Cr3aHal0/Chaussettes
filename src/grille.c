@@ -37,6 +37,37 @@ void initGrille(Couleur matrice[TAILLE_LIGNE][TAILLE_COLONNE])
     }
 }
 
+/* Le joueur ne peut placer son jeton qu'uniquement sur les colonnes, le jeton va descendre si il reste de la place*/
+int placerJeton(int position, Couleur couleur, Couleur matrice[TAILLE_LIGNE][TAILLE_COLONNE])
+{
+	if (position < 0 || position > TAILLE_COLONNE || isdigit(position))
+	{
+		
+		printf("Erreur : Jeton en dehors du jeu\n");
+		return -1; 
+	}
+	//Si la colonne est pleine
+		
+	else if (matrice[position][0] != BLANC)
+	{
+		printf("Erreur : Colonne pleine\n");
+		return 0;
+	}		
+	else
+	{		
+		int i = TAILLE_COLONNE-1;
+		while (matrice[position][i] != BLANC){
+			i--;
+		}
+		printf("Jeton placé a l'emplacement %d, %d\n", position, i);
+		matrice[position][i] = couleur;
+		
+		return 1;
+	}
+
+	
+}
+
 /*
 char* matrix_to_buffer(Couleur matrice[TAILLE_LIGNE][TAILLE_COLONNE])
 {

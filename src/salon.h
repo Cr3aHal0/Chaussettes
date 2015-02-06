@@ -33,6 +33,4 @@ Couleur ajouter_joueur(Salon_t * salon, int slot, int joueur);
 void afficher_infos_salon(Salon_t salon);
 void raz_salon(Salon_t* salon);
 int is_win(Couleur grille[TAILLE_LIGNE][TAILLE_COLONNE]);
-int placerJeton(int position, Couleur couleur, Couleur matrice[TAILLE_LIGNE][TAILLE_COLONNE]);
 void notifierJoueurs(Salon_t *salon, int status);
-
