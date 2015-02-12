@@ -43,30 +43,37 @@ int main()
 		int commencee = 0;
 		printf("En attente d'un autre joueur...\n");
 		while (commencee == 0) {
-			commencee = partie_commencee(sd, choix);
+			commencee = partie_commencee(sd);
 		}
 		printf("Un deuxième joueur à rejoint la salle !\n");
 	}
 	else {
+		int commencee = 0;
+		while (commencee == 0) {
+			commencee = partie_commencee(sd);
+		}
 		printf("La partie est sur le point de commencer !\n");
 	}
+
+	Couleur grille[TAILLE_LIGNE][TAILLE_COLONNE];
+
+	//Début de partie
+	printf("La partie commence !!!\n");
+	initGrille(grille);
+	afficherGrille(grille);
 
 	int end = 0;
 	int x;
 	int waiting = 1;
-	Couleur grille[TAILLE_LIGNE][TAILLE_COLONNE];
+
 	while (end == 0) {
 		printf("Partie en cours...\n");
-		Message *signal = get_signal(sd);
+		printf("En attente du tour du joueur adverse ...\n");
+		Message *signal = malloc(sizeof(*signal));
+		signal = get_signal(sd);
 
 		if (signal != NULL) {
 			switch(signal->action) {
-				//Début de partie
-				case GAME_START:
-					printf("La partie commence !!!\n");
-					initGrille(grille);
-					afficherGrille(grille);
-				break;
 
 				//Partie remportée par un joueur
 				case PLAYER_WIN:
@@ -77,8 +84,10 @@ int main()
 				//Tour d'un joueur
 				case PLAYER_TURN:
 					if (signal->couleur == couleur) {
+						printf("\n------\n A votre tour de jouer ! \n------\n");
 						waiting = 0;
 					}
+
 					if (waiting == 0) {
 						int fail = 1;
 						while (fail == 1 ) {
@@ -92,12 +101,14 @@ int main()
 							write(sd, toString(&m), TAILLE_MAX * sizeof(char));
 
 							//Waiting for a response
-							Message* ret = get_signal(sd);
+							Message *ret = get_signal(sd);
 						 	if (ret->action == TOKEN_ERROR) {
 								printf("U SUCK : FULL OR INCORRECT COLUMN BITCH\n");
 							}
 							else
 							{
+								placerJeton(signal->x, signal->couleur, grille);
+								waiting = 1;
 								fail = 0;
 							}
 						}
@@ -113,10 +124,11 @@ int main()
 				break;
 
 				default:
-
+					printf("Action reçue : %d\n", signal->action);
 				break;
 			}
 		}
+		free(signal);
 		sleep(4);
 	}
 	//Tant que la partie n'est pas finie

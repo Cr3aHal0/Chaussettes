@@ -36,3 +36,5 @@ void *gestion_joueur(void *sd);
 
 void diffuserMessage(Salon_t *salon, Message *message);
 void envoyerMessageJoueur(int slot, Message *message);
+Message* get_signal(int sd);
+

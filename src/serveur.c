@@ -111,19 +111,23 @@ void *connection_handler(void *client)
 {
 	Client *connection = (Client*)client;
 
-	while (1) {
+	//while (1) {
 		//Rejoindre un salon
 		int num = 0;
-		read(connection->sd, &num, sizeof(int));
-		printf("Numero de salon : %d\n", num);
+		Message *mes = get_signal(connection->sd);
+		if (mes->action == CHOOSE_LOBBY) {
+			num = mes->salon;
+			printf("Numero de salon : %d\n", num);
 
-        int couleur_joueur = rejoindreSalon(&connection->server, connection, num);
-        printf("Couleur %d\n", couleur_joueur);
+			mes->couleur = rejoindreSalon(&connection->server, connection, num);
+			printf("Couleur %d\n", mes->couleur);
 
-        //Envoi de la couleur au joueur
-        write(connection->sd, &couleur_joueur, sizeof(int));
-		printf("Canal rejoint : %d\n", connection->sd);        			
-	}
+			//Envoi de la couleur au joueur
+			envoyerMessageJoueur(connection->sd, mes);
+			printf("Canal rejoint : %d\n", connection->sd);
+		}
+		free(mes);
+	//}
 	
 	 //Send some messages to the client
 	//message = "Greetings! I am your connection handler\n";
@@ -142,11 +146,17 @@ void *gestion_salon(void *salon) {
 		
 		while (lobby->nb_joueurs < 2) {
 			//printf("[%d] Waiting for %d people to join ... \n", lobby->id, (2-lobby->nb_joueurs));
-			notifierJoueurs(lobby, 0);
+			Message *mes1 = malloc(sizeof(*mes1));
+			mes1->action = WAITING_PLAYER;
+			diffuserMessage(lobby, mes1);
 			sleep(1);
 		}
 		
-		notifierJoueurs(lobby, 1);
+		Message *mes = malloc(sizeof(*mes));
+		mes->action = GAME_START;
+		diffuserMessage(lobby, mes);
+
+		sleep(1);
 
 		Message *m = malloc(sizeof(*m));
 		m->salon = -1;
@@ -155,9 +165,10 @@ void *gestion_salon(void *salon) {
 		m->couleur = ROUGE;
 
 		diffuserMessage(lobby, m);
+		int winner;
 
-		while (!is_win(lobby->grille)) {
-			printf("[%d] Partie toujours en cours\n", lobby->id);
+		while (!(winner = is_win(lobby->grille))) {
+			//printf("[%d] Partie toujours en cours\n", lobby->id);
 			
 				/*//On reçoit la position du jeton du joueur
 				read(newSd, &position, sizeof(int));
@@ -165,11 +176,16 @@ void *gestion_salon(void *salon) {
 				placerJeton(position, couleur_joueur, server.salons[num].grille);
 				afficherGrille(server.salons[num].grille);*/
 				
-			sleep(5);
+			sleep(1);
 			//Il faudrait kick les joueurs du salon quand on remet a 0 celui ci
 		}
 		
-		printf("Le joueur %d a gagné!\n", is_win(lobby->grille));
+		printf("Le joueur %d a gagné!\n", winner);
+		m->action = PLAYER_WIN;
+		m->couleur = winner;
+		diffuserMessage(lobby, m);
+
+		break;
 		//TODO : Il faudrait kick les joueurs du salon quand on remet a 0 celui ci
 
 	}
@@ -265,19 +281,9 @@ void *gestion_joueur(void *data) {
 	printf("Slot occupé : %d\n", joueur->slot);
 
 	char* buffer = reserver();
-	int start = 0;
+	int start = 1;
 	//Tant que le thread est en vie
 	while(1) {
-
-		if (joueur->salon->nb_joueurs == 2 && start == 0) {
-			Message m;
-			m.action = GAME_START;
-			char* buf = toString(&m);
-			write(joueur->slot, buf, TAILLE_MAX * sizeof(char));
-			start = 1;
-			//printf("Message notifié : %s\n", buf);
-			sleep(2);
-		}
 
 		while (start == 1) {
 			read(joueur->slot, buffer, TAILLE_MAX * sizeof(char));
@@ -296,6 +302,12 @@ void *gestion_joueur(void *data) {
 						m.action = PLAYER_PUT_TOKEN;
 						m.x = message->x;
 						m.couleur = message->couleur;
+
+						diffuserMessage(joueur->salon, &m);
+
+						m.x = -1;
+						m.action = PLAYER_TURN;
+						m.couleur = (message->couleur == ROUGE) ? JAUNE : ROUGE;
 
 						diffuserMessage(joueur->salon, &m);
 					}
@@ -340,6 +352,15 @@ void diffuserMessage(Salon_t *salon, Message *message) {
 
 void envoyerMessageJoueur(int slot, Message *message) {
 	write(slot, toString(message), TAILLE_MAX * sizeof(char));
+}
+
+Message* get_signal(int sd) {
+	char* buf = malloc(TAILLE_MAX * sizeof(char));
+	recv(sd, buf, TAILLE_MAX * sizeof(char), MSG_WAITALL);
+	printf("Message reçu : %s\n", buf);
+	Message *message = fromString(buf);
+	free(buf);
+	return message;
 }
 
 //Fonction permettant de kill le processus, ou fermer le port (a voir) lorsqu'on ferme le serveur (CTRL+C)

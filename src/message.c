@@ -22,7 +22,7 @@ char* toString(Message *message) {
         strcat(buff, ";");
     }
     if (message->couleur != -1) {
-        strcat(buff, "joueur=");
+        strcat(buff, "couleur=");
         sprintf(truc, "%d", message->couleur);
         strcat(buff, truc);
         strcat(buff, ";");
@@ -46,7 +46,11 @@ char* reserver() {
 
 Message* fromString(char* message) {
     Message *mes = malloc(sizeof(*mes));
+    mes->action = -1;
+    mes->couleur = -1;
     mes->x = -1;
+    mes->salon = -1;
+
     char* truc = (char *) malloc(20 * sizeof(char));
     char* valeurs = (char *) malloc(2 * sizeof(char));
 

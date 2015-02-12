@@ -87,12 +87,20 @@ void se_deconnecter(int sd)
 Couleur rejoindre_salon(int sd, int num_salon)
 {
 	
+	Message m;
+	m.action = CHOOSE_LOBBY;
+	m.salon = num_salon;
+
 	//Envoi du numero de salon au serveur
-	write(sd, &num_salon, sizeof(int));
-	int couleur;
-	//Reception de la couleur attribuée par le salon
-	read(sd, &couleur, sizeof(int));
-	switch(couleur)
+	printf("Envoi message...");
+	write(sd, toString(&m), TAILLE_MAX * sizeof(char));
+	printf("Message Envoyé\n");
+
+	printf("En attente d'une réponse...");
+	Message *mes = get_signal(sd);
+	printf("Réponse reçue\n");
+
+	switch(mes->couleur)
 	{
 		case 1:
 			printf("Vous etes le joueur ROUGE\n");
@@ -101,10 +109,11 @@ Couleur rejoindre_salon(int sd, int num_salon)
 			printf("Vous etes le joueur JAUNE\n");
 			break;
 		default:
-			printf("Aucune couleur attribuée\n");
+			printf("Erreur dans l'attribution d'une couleur");
+			exit(1);
 			break;
 	}	
-	return couleur;
+	return mes->couleur;
 	
 }
 
@@ -136,16 +145,18 @@ void afficher_grille(int sd)
 	
 }
 
-int partie_commencee(int sd, int choix) {
+int partie_commencee(int sd) {
     int i;
-    read(sd, &i, sizeof(int));
+    Message *mes = get_signal(sd);
 	//printf("Statut reçu : %d\n", i);
-    return (i==1) ? 1 : 0;
+    return (mes->action == GAME_START) ? 1 : 0;
 }
 
 Message* get_signal(int sd) {
 	char* buf = malloc(TAILLE_MAX * sizeof(char));
-	read(sd, buf, TAILLE_MAX * sizeof(char));
+	recv(sd, buf, TAILLE_MAX * sizeof(char), MSG_WAITALL);
 	printf("Message reçu : %s\n", buf);
-	return fromString(buf);
+	Message *message = fromString(buf);
+	free(buf);
+	return message;
 }
