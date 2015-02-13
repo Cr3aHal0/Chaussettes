@@ -93,6 +93,7 @@ int main()
 						while (fail == 1 ) {
 							printf("Dans quelle colonne souhaitez-vous  ajouter un pion ?\n");
 							scanf("%d", &x);
+							x = atoi(x);
 
 							Message m;
 							m.action = PLAYER_PUT_TOKEN;
@@ -120,6 +121,8 @@ int main()
 					placerJeton(signal->x, signal->couleur, grille);
 					if (signal->couleur == couleur) {
 						waiting = 1;
+					} else {
+						waiting = 0;
 					}
 				break;
 
