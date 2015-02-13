@@ -40,7 +40,9 @@ void initGrille(Couleur matrice[TAILLE_LIGNE][TAILLE_COLONNE])
 /* Le joueur ne peut placer son jeton qu'uniquement sur les colonnes, le jeton va descendre si il reste de la place*/
 int placerJeton(int position, Couleur couleur, Couleur matrice[TAILLE_LIGNE][TAILLE_COLONNE])
 {
-	if (position < 0 || position > TAILLE_COLONNE || isdigit(position))
+	position--;
+	printf("position du jeton : %d pour la couleur : %d:\n", position, couleur);
+	if ((position < 0) || (position > TAILLE_COLONNE))
 	{
 		
 		printf("Erreur : Jeton en dehors du jeu\n");

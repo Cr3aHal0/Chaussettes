@@ -27,6 +27,7 @@ typedef struct
 
 void chargerSalons(Server*);
 void freeSalons(Server*);
+void reinitSalon(Salon_t *salon);
 int rejoindreSalon(Server*, Client *client, int);
 int aJoueur(Server server, struct in_addr client);
 int ajouter_client(Server *server, struct in_addr client) ;

@@ -68,6 +68,7 @@ int main(int argc,char *argv[])
     cliLen = sizeof(cliAddr);
     while (newSd = accept(sd,(struct sockaddr *) &cliAddr, &cliLen))
     {
+		printf("Acceptation d'un nouveau client \n");
 		if(newSd<0)
 		{
 		    perror("Cannot accept connection");
@@ -88,8 +89,10 @@ int main(int argc,char *argv[])
 		{
 			printf("Thread créé avec succès \n");
 		}
+		printf("Fin du lancement du thread %d \n", client->sd);
     }
 
+	printf("Fin du while\n");
     freeSalons(&server);
 
     return(SUCCESS);
@@ -167,7 +170,7 @@ void *gestion_salon(void *salon) {
 		diffuserMessage(lobby, m);
 		int winner;
 
-		while (!(winner = is_win(lobby->grille))) {
+		while ((winner = is_win(lobby->grille)) == 0) {
 			//printf("[%d] Partie toujours en cours\n", lobby->id);
 			
 				/*//On reçoit la position du jeton du joueur
@@ -185,12 +188,52 @@ void *gestion_salon(void *salon) {
 		m->couleur = winner;
 		diffuserMessage(lobby, m);
 
-		break;
-		//TODO : Il faudrait kick les joueurs du salon quand on remet a 0 celui ci
+		//renew salon
+		reinitSalon(lobby);
 
+		//Déconnecter client : close les sockets
 	}
 	
 	return NULL;
+}
+
+void reinitSalon(Salon_t *salon) {
+
+	//Free the sockets allocated
+	int i;
+	for (i = 0; i < salon->nb_sockets; i++) {
+		close(salon->nb_sockets);
+	}
+	printf("Fermeture des sockets du salon %d\n", salon->id);
+
+	salon->nb_joueurs = 0;     
+    salon->joueur_courant = -1;
+    salon->liste_joueur[0] = -1;
+    salon->liste_joueur[1] = -1;
+	salon->sockets_id[0] = 0;
+	salon->sockets_id[1] = 0;
+	salon->nb_sockets = 0;
+
+	for (i = 0; i < salon->nb_threads; i++) {
+		pthread_join (*salon->threads_joueurs[i], NULL);
+	}
+	printf("Fermeture des threads du salon %d\n", salon->id);
+
+	salon->nb_threads = 0;
+
+	//Close threads_joueurs
+	salon->threads_joueurs = malloc(2*sizeof(pthread_t));
+	printf("Réallocation d'espace pour les threads du salon %d\n", salon->id);
+
+    int x, y;
+    for (x = 0; x < TAILLE_LIGNE; x++) {
+        for(y = 0; y < TAILLE_COLONNE; y++) {
+            salon->grille[x][y] = 0;
+        }
+    }
+	printf("Remise à zéro de la grille du salon %d\n", salon->id);
+
+	printf("Salon %d réinitialisé avec succès \n", salon->id);
 }
 
 void chargerSalons(Server *server) {
@@ -281,14 +324,22 @@ void *gestion_joueur(void *data) {
 	printf("Slot occupé : %d\n", joueur->slot);
 
 	char* buffer = reserver();
-	int start = 1;
-	//Tant que le thread est en vie
-	while(1) {
+	//int start = 1;
 
-		while (start == 1) {
+	//Tant que le thread est en vie et que le socket l'est aussi
+	int error = 0;
+	socklen_t len = sizeof (error);
+	int retval;
+
+	while(((retval = getsockopt (joueur->slot, SOL_SOCKET, SO_ERROR, &error, &len )) == 0)
+			&& (is_win(joueur->salon->grille) == 0)) {
+
+			printf("Etat de la socket : %d\n", retval);
+			/*while (start == 1)*/ {
 			read(joueur->slot, buffer, TAILLE_MAX * sizeof(char));
 			printf("Message reçu : %s \n", buffer);
 			int retour;
+			int winner;
 
 			Message *message = fromString(buffer);
 			switch (message->action) {
@@ -305,11 +356,13 @@ void *gestion_joueur(void *data) {
 
 						diffuserMessage(joueur->salon, &m);
 
-						m.x = -1;
-						m.action = PLAYER_TURN;
-						m.couleur = (message->couleur == ROUGE) ? JAUNE : ROUGE;
+						if ((winner = is_win(joueur->salon->grille)) == 0) {
+							m.x = -1;
+							m.action = PLAYER_TURN;
+							m.couleur = (message->couleur == ROUGE) ? JAUNE : ROUGE;
 
-						diffuserMessage(joueur->salon, &m);
+							diffuserMessage(joueur->salon, &m);	
+						}
 					}
 					else
 					{
@@ -321,6 +374,8 @@ void *gestion_joueur(void *data) {
 		}
 
 	}
+
+	printf("Fin du thread de gestion du joueur du slot %d\n", joueur->slot);
 	
 	return NULL;
 }

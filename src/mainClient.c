@@ -65,6 +65,7 @@ int main()
 	int end = 0;
 	int x;
 	int waiting = 1;
+	char *saisie = malloc(sizeof(saisie));
 
 	while (end == 0) {
 		printf("Partie en cours...\n");
@@ -78,7 +79,15 @@ int main()
 				//Partie remportée par un joueur
 				case PLAYER_WIN:
 					end = 1;
-					printf("Partie terminé : victoire du joueur %d\n", signal->couleur);
+					if (signal->couleur == couleur) {
+						printf("Vous avez gagné !\n");
+					}
+					else
+					{
+						printf("Vous avez perdu :'(\n");
+					}
+					se_deconnecter(sd);
+					//printf("Partie terminé : victoire du joueur %d\n", signal->couleur);
 				break;
 
 				//Tour d'un joueur
@@ -92,8 +101,8 @@ int main()
 						int fail = 1;
 						while (fail == 1 ) {
 							printf("Dans quelle colonne souhaitez-vous  ajouter un pion ?\n");
-							scanf("%d", &x);
-							//x = atoi(x);
+							scanf("%s", saisie);
+							x = atoi(saisie);
 
 							Message m;
 							m.action = PLAYER_PUT_TOKEN;
@@ -104,13 +113,14 @@ int main()
 							//Waiting for a response
 							Message *ret = get_signal(sd);
 						 	if (ret->action == TOKEN_ERROR) {
-								printf("U SUCK : FULL OR INCORRECT COLUMN BITCH\n");
+								printf("Erreur de token\n");
 							}
 							else
 							{
-								placerJeton(signal->x, signal->couleur, grille);
+								placerJeton(x, signal->couleur, grille);
 								waiting = 1;
 								fail = 0;
+								afficherGrille(grille);
 							}
 						}
 					}
@@ -119,6 +129,7 @@ int main()
 				//Un joueur pose un jeton
 				case PLAYER_PUT_TOKEN:
 					placerJeton(signal->x, signal->couleur, grille);
+					afficherGrille(grille);
 					if (signal->couleur == couleur) {
 						waiting = 1;
 					} else {
@@ -132,7 +143,7 @@ int main()
 			}
 		}
 		free(signal);
-		sleep(4);
+		sleep(1);
 	}
 	//Tant que la partie n'est pas finie
 	/*int i;

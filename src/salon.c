@@ -21,6 +21,8 @@ int is_win(Couleur grille[TAILLE_LIGNE][TAILLE_COLONNE])
 	/*Verif par colonne*/
 	while (x < TAILLE_LIGNE && size < 4)
 	{
+		int current = grille[x][0];
+
 		//check each line
 		y = 0;
 		color = grille[x][y];
@@ -28,6 +30,7 @@ int is_win(Couleur grille[TAILLE_LIGNE][TAILLE_COLONNE])
 		{
 			if ((grille[x][y] == grille[x][y+1]) && grille[x][y+1] != 0)
 			{
+				//printf("Le jeton %d est différent de %d \n",grille[x][y], grille[x][y+1]); 
 				size++;
 			}
 			else
@@ -39,7 +42,10 @@ int is_win(Couleur grille[TAILLE_LIGNE][TAILLE_COLONNE])
 		}
 		x++;
 	} 	
+
+	//printf("Taille du plus gros groupement observé : %d pour la couleur %d \n", size, color);
 	if (size == 4) return color;
+
 	/*Verif par ligne*/	
 	y = 0;
 	size = 1;
@@ -64,7 +70,12 @@ int is_win(Couleur grille[TAILLE_LIGNE][TAILLE_COLONNE])
 		y++;
 	} 	
 
-	if (size == 4) return color;
+	if (size == 4) {
+		return color;
+		//printf("Taille du plus gros groupement observé : %d pour la couleur %d \n", size, color);
+	}else{
+		return 0;
+	}
 }
 
 
