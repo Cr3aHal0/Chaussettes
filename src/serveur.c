@@ -168,6 +168,9 @@ void *gestion_salon(void *salon) {
 		m->couleur = ROUGE;
 
 		diffuserMessage(lobby, m);
+
+		lobby->joueur_courant = m->couleur;
+
 		int winner;
 
 		while ((winner = is_win(lobby->grille)) == 0) {
@@ -202,7 +205,7 @@ void reinitSalon(Salon_t *salon) {
 	//Free the sockets allocated
 	int i;
 	for (i = 0; i < salon->nb_sockets; i++) {
-		close(salon->nb_sockets);
+		close(salon->sockets_id[i]);
 	}
 	printf("Fermeture des sockets du salon %d\n", salon->id);
 
@@ -217,6 +220,8 @@ void reinitSalon(Salon_t *salon) {
 	for (i = 0; i < salon->nb_threads; i++) {
 		pthread_join (*salon->threads_joueurs[i], NULL);
 	}
+	free(salon->threads_joueurs);
+
 	printf("Fermeture des threads du salon %d\n", salon->id);
 
 	salon->nb_threads = 0;
@@ -330,53 +335,63 @@ void *gestion_joueur(void *data) {
 	int error = 0;
 	socklen_t len = sizeof (error);
 	int retval;
+	int winner = 0;
 
 	while(((retval = getsockopt (joueur->slot, SOL_SOCKET, SO_ERROR, &error, &len )) == 0)
-			&& (is_win(joueur->salon->grille) == 0)) {
+			&& (winner == 0)) {
 
 			printf("Etat de la socket : %d\n", retval);
 			/*while (start == 1)*/ {
 			read(joueur->slot, buffer, TAILLE_MAX * sizeof(char));
 			printf("Message reçu : %s \n", buffer);
 			int retour;
-			int winner;
 
 			Message *message = fromString(buffer);
-			switch (message->action) {
-				//Un joueur pose un jeton
-				case PLAYER_PUT_TOKEN:
-					retour = placerJeton(message->x, message->couleur, joueur->salon->grille);
-					Message m;
-					if (retour == 1) {
-						//Okay dude
-						
-						m.action = PLAYER_PUT_TOKEN;
-						m.x = message->x;
-						m.couleur = message->couleur;
+			printf("Message reçu pour le salon %d depuis %d\n", joueur->salon->id, message->salon);
+			if (message->salon == joueur->salon->id) {
+				printf("Message reçu pour le salon %d\n", joueur->salon->id);
+				switch (message->action) {
+					//Un joueur pose un jeton
+					case PLAYER_PUT_TOKEN:
+						if (message->couleur == joueur->salon->joueur_courant) {
+							retour = placerJeton(message->x, message->couleur, joueur->salon->grille);
+							Message m;
+							if (retour == 1) {
+								//Okay dude
 
-						diffuserMessage(joueur->salon, &m);
+								m.action = PLAYER_PUT_TOKEN;
+								m.x = message->x;
+								m.couleur = message->couleur;
 
-						if ((winner = is_win(joueur->salon->grille)) == 0) {
-							m.x = -1;
-							m.action = PLAYER_TURN;
-							m.couleur = (message->couleur == ROUGE) ? JAUNE : ROUGE;
+								diffuserMessage(joueur->salon, &m);
 
-							diffuserMessage(joueur->salon, &m);	
+								if ((winner = is_win(joueur->salon->grille)) == 0) {
+									m.x = -1;
+									m.action = PLAYER_TURN;
+									m.couleur = (message->couleur == ROUGE) ? JAUNE : ROUGE;
+
+									diffuserMessage(joueur->salon, &m);
+
+									joueur->salon->joueur_courant = m.couleur;
+								}
+								afficherGrille(joueur->salon->grille);
+							}
+							else
+							{
+								m.action = TOKEN_ERROR;
+								envoyerMessageJoueur(joueur->slot,&m);
+							}
 						}
-					}
-					else
-					{
-						m.action = TOKEN_ERROR;
-						envoyerMessageJoueur(joueur->slot,&m);
-					}
-				break;
+					break;
+				}
 			}
+			free(message);
 		}
 
 	}
 
 	printf("Fin du thread de gestion du joueur du slot %d\n", joueur->slot);
-	
+
 	return NULL;
 }
 

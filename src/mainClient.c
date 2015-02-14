@@ -86,7 +86,6 @@ int main()
 					{
 						printf("Vous avez perdu :'(\n");
 					}
-					se_deconnecter(sd);
 					//printf("Partie terminé : victoire du joueur %d\n", signal->couleur);
 				break;
 
@@ -108,8 +107,10 @@ int main()
 							m.action = PLAYER_PUT_TOKEN;
 							m.couleur = couleur;
 							m.x = x;
-							write(sd, toString(&m), TAILLE_MAX * sizeof(char));
+							m.salon = choix-1;
 
+							write(sd, toString(&m), TAILLE_MAX * sizeof(char));
+							//printf("Envoi de l'ordre %s\n au serveur", toString(&m));
 							//Waiting for a response
 							Message *ret = get_signal(sd);
 						 	if (ret->action == TOKEN_ERROR) {
@@ -145,6 +146,8 @@ int main()
 		free(signal);
 		sleep(1);
 	}
+
+	se_deconnecter(sd);
 	//Tant que la partie n'est pas finie
 	/*int i;
 	
