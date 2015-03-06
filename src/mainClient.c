@@ -1,7 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "client.h"
+#include <signal.h>
 
+int sd;
+
+void handler_arret(int signum)
+{
+	printf("Préparation d'un signal pour déconnexion\n...");
+	Message signal;
+	signal.action = DISCONNECTING;
+
+	write(sd, toString(&signal), TAILLE_MAX * sizeof(char));	
+	printf("Message envoyé /!\\\n");
+	se_deconnecter(sd);
+	exit(1);
+}	
 
 
 int main()
@@ -12,7 +26,7 @@ int main()
 	char adresse_ip[16];
 	scanf("%s", adresse_ip);
 	printf("Tentative de connexion au serveur %s en cours...\n\n\n\n", adresse_ip);
-	int sd = se_connecter(adresse_ip);
+	sd = se_connecter(adresse_ip);
 	//Pour clear le terminal LINUX
 	system("clear");
 	
@@ -30,6 +44,8 @@ int main()
         se_deconnecter(sd);
         exit(1);
     }
+
+	signal(SIGINT, handler_arret);
 
 	Couleur couleur = rejoindre_salon(sd, choix);
 	printf("Connexion au salon n°%d avec la couleur %d\n", choix, couleur);
@@ -137,6 +153,13 @@ int main()
 						waiting = 0;
 					}
 				break;
+
+				//Trying to handle violent disconnection
+				case DISCONNECTING:
+					printf("Le joueur adverse a quitté la partie. Déconnexion...\n");
+					end = 1;
+				break;
+				// <<
 
 				default:
 					printf("Action reçue : %d\n", signal->action);

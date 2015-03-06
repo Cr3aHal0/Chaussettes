@@ -16,7 +16,8 @@ typedef enum  Action {
 	PLAYER_WIN = 3,
 	TOKEN_ERROR = 4,
 	WAITING_PLAYER = 10,
-	CHOOSE_LOBBY = 99
+	CHOOSE_LOBBY = 99,
+	DISCONNECTING = 100
 } Action;
 
 char* reserver();

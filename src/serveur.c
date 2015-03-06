@@ -173,7 +173,7 @@ void *gestion_salon(void *salon) {
 
 		int winner;
 
-		while ((winner = is_win(lobby->grille)) == 0) {
+		while ((winner = is_win(lobby->grille)) == 0 && (lobby->nb_joueurs == 2)) {
 			//printf("[%d] Partie toujours en cours\n", lobby->id);
 			
 				/*//On reçoit la position du jeton du joueur
@@ -186,11 +186,12 @@ void *gestion_salon(void *salon) {
 			//Il faudrait kick les joueurs du salon quand on remet a 0 celui ci
 		}
 		
-		printf("Le joueur %d a gagné!\n", winner);
-		m->action = PLAYER_WIN;
-		m->couleur = winner;
-		diffuserMessage(lobby, m);
-
+		if (lobby->nb_joueurs == 2) {
+			printf("Le joueur %d a gagné!\n", winner);
+			m->action = PLAYER_WIN;
+			m->couleur = winner;
+			diffuserMessage(lobby, m);
+		}
 		//renew salon
 		reinitSalon(lobby);
 
@@ -335,10 +336,10 @@ void *gestion_joueur(void *data) {
 	int error = 0;
 	socklen_t len = sizeof (error);
 	int retval;
+	int ended = 0;
 	int winner = 0;
-
 	while(((retval = getsockopt (joueur->slot, SOL_SOCKET, SO_ERROR, &error, &len )) == 0)
-			&& (winner == 0)) {
+			&& (ended == 0) && (winner == 0)) {
 
 			printf("Etat de la socket : %d\n", retval);
 			/*while (start == 1)*/ {
@@ -383,6 +384,17 @@ void *gestion_joueur(void *data) {
 							}
 						}
 					break;
+					// >> Trying to handle violent player disconnecting
+					case DISCONNECTING:
+						printf("/!\\ Player trying to disconnect\n");
+						diffuserMessage(joueur->salon, message);
+						close(joueur->slot);
+						joueur->salon->nb_joueurs--;
+						printf("Slot %d coupé\n", joueur->slot);	
+						ended = 1;	
+						printf("Fin de la partie");	
+					break;
+					// << 
 				}
 			}
 			free(message);
