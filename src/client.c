@@ -109,8 +109,8 @@ Couleur rejoindre_salon(int sd, int num_salon)
 			printf("Vous etes le joueur JAUNE\n");
 			break;
 		default:
-			printf("Erreur dans l'attribution d'une couleur");
-			exit(1);
+			//printf("Erreur dans l'attribution d'une couleur");
+			mes->couleur = 0;
 			break;
 	}	
 	return mes->couleur;

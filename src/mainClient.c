@@ -34,10 +34,20 @@ int main()
 	//int nb_salons = get_nb_salon();
 	
 	int choix;
+	Couleur couleur;
+
     do {
 	    printf("Veuillez choisir un numéro de salon ou tapez 0 pour quitter\n");
-	    scanf("%d", &choix);			
-	}while (choix < 0 && choix > 4);
+	    scanf("%d", &choix);
+			
+		if (choix != 0) {
+			couleur = rejoindre_salon(sd, choix);
+			if (couleur == 0) {
+				printf("[Erreur] Salon %d plein !\n", choix);
+			}
+		}
+
+	}while ((choix < 0 && choix > 4) || couleur ==0);
 	
 
     if (choix == 0) {
@@ -46,14 +56,6 @@ int main()
     }
 
 	signal(SIGINT, handler_arret);
-
-	Couleur couleur = rejoindre_salon(sd, choix);
-	printf("Connexion au salon n°%d avec la couleur %d\n", choix, couleur);
-
-	if (couleur == 0) {
-		printf("Erreur, impossible de rejoindre le salon\n");
-		exit(1);
-	}
 
 	if (couleur == ROUGE) {
 		int commencee = 0;
