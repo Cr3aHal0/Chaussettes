@@ -108,7 +108,9 @@ char* afficher_liste_salons()
 void *connection_handler(void *client)
 {
 	Client *connection = (Client*)client;
-
+	int joined = 0;
+	
+	while(joined == 0) {
 	//while (1) {
 		//Rejoindre un salon
 		int num = 0;
@@ -123,11 +125,13 @@ void *connection_handler(void *client)
 
 			//If mes->couleur >= 0 then he has been added to the player base.
 			if (mes->couleur >= 0) {
+				joined = 1;
 				printf("Couleur %d\n", mes->couleur);
 				printf("Canal rejoint : %d\n", connection->sd);
 			}
 		}
 		free(mes);
+	}
 	//}
 	
 	 //Send some messages to the client
