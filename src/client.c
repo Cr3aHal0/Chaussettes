@@ -93,7 +93,7 @@ Couleur rejoindre_salon(int sd, int num_salon)
 
 	//Envoi du numero de salon au serveur
 	printf("Envoi message...");
-	write(sd, toString(&m), TAILLE_MAX * sizeof(char));
+	write(sd, &m, sizeof(Message));
 	printf("Message Envoyé\n");
 
 	printf("En attente d'une réponse...");
@@ -109,8 +109,8 @@ Couleur rejoindre_salon(int sd, int num_salon)
 			printf("Vous etes le joueur JAUNE\n");
 			break;
 		default:
-			//printf("Erreur dans l'attribution d'une couleur");
-			mes->couleur = 0;
+			printf("Erreur dans l'attribution d'une couleur");
+			mes->couleur = -1;
 			break;
 	}	
 	return mes->couleur;
@@ -153,10 +153,15 @@ int partie_commencee(int sd) {
 }
 
 Message* get_signal(int sd) {
+	/*
 	char* buf = malloc(TAILLE_MAX * sizeof(char));
 	recv(sd, buf, TAILLE_MAX * sizeof(char), MSG_WAITALL);
 	printf("Message reçu : %s\n", buf);
 	Message *message = fromString(buf);
 	free(buf);
+	return message;*/
+	Message *message = malloc(sizeof(*message));
+	recv(sd, message, sizeof(Message), MSG_WAITALL);
+	printf("Reçu : %s \n", toString(message));
 	return message;
 }

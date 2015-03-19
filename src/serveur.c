@@ -1,11 +1,3 @@
-/**
- * Note : 
- * 	Le serveur possède plusieurs salons (10)
- * 	Quand un joueur joue sur une grille, il joue sur la grille du salon, et pas directement depuis le serveur.
- * 
- **/
-
-
 #include "serveur.h"
 
 #define LOCALHOST "127.0.0.1"
@@ -110,6 +102,9 @@ char* afficher_liste_salons()
 	
 }
 
+/**
+ *	Handler dedicated to listen for new client then trying to add them in the player base
+ */
 void *connection_handler(void *client)
 {
 	Client *connection = (Client*)client;
@@ -122,12 +117,15 @@ void *connection_handler(void *client)
 			num = mes->salon;
 			printf("Numero de salon : %d\n", num);
 
+			//Try to retrieve a slot for the new player
 			mes->couleur = rejoindreSalon(&connection->server, connection, num);
-			printf("Couleur %d\n", mes->couleur);
-
-			//Envoi de la couleur au joueur
 			envoyerMessageJoueur(connection->sd, mes);
-			printf("Canal rejoint : %d\n", connection->sd);
+
+			//If mes->couleur >= 0 then he has been added to the player base.
+			if (mes->couleur >= 0) {
+				printf("Couleur %d\n", mes->couleur);
+				printf("Canal rejoint : %d\n", connection->sd);
+			}
 		}
 		free(mes);
 	//}
@@ -139,14 +137,19 @@ void *connection_handler(void *client)
 	return NULL;
 }	
 
+
+/**
+ *	Thread function dedicated to each life of lobbys
+ */
 void *gestion_salon(void *salon) {
 	Salon_t *lobby = (Salon_t*)salon;
 	printf("nombre de joueurs dans le salon : %d \n", lobby->nb_joueurs);
 	printf("En attente de joueurs\n");
 	
-	//Tant que le thread est en vie
+	//While the thread is alive
 	while(1) {
 		
+		//While the lobby isn't complete
 		while (lobby->nb_joueurs < 2) {
 			//printf("[%d] Waiting for %d people to join ... \n", lobby->id, (2-lobby->nb_joueurs));
 			Message *mes1 = malloc(sizeof(*mes1));
@@ -155,12 +158,14 @@ void *gestion_salon(void *salon) {
 			sleep(1);
 		}
 		
+		//Tell the players we're ready to go
 		Message *mes = malloc(sizeof(*mes));
 		mes->action = GAME_START;
 		diffuserMessage(lobby, mes);
 
 		sleep(1);
 
+		//Send a message to tell players than the first one can play
 		Message *m = malloc(sizeof(*m));
 		m->salon = -1;
 		m->x = -1;
@@ -175,23 +180,18 @@ void *gestion_salon(void *salon) {
 
 		while ((winner = is_win(lobby->grille)) == 0 && (lobby->nb_joueurs == 2)) {
 			//printf("[%d] Partie toujours en cours\n", lobby->id);
-			
-				/*//On reçoit la position du jeton du joueur
-				read(newSd, &position, sizeof(int));
-				//Le joueur place un jeton
-				placerJeton(position, couleur_joueur, server.salons[num].grille);
-				afficherGrille(server.salons[num].grille);*/
 				
 			sleep(1);
-			//Il faudrait kick les joueurs du salon quand on remet a 0 celui ci
 		}
 		
+		//If we're out and there is still 2 players, then the game is over
 		if (lobby->nb_joueurs == 2) {
 			printf("Le joueur %d a gagné!\n", winner);
 			m->action = PLAYER_WIN;
 			m->couleur = winner;
 			diffuserMessage(lobby, m);
 		}
+
 		//renew salon
 		reinitSalon(lobby);
 
@@ -201,6 +201,12 @@ void *gestion_salon(void *salon) {
 	return NULL;
 }
 
+/**
+ * Reinitialize a lobby :
+ * - empty the array containing players
+ * - empty the array containing the socket identifiers
+ * - close each thread allocated to players
+ */
 void reinitSalon(Salon_t *salon) {
 
 	//Free the sockets allocated
@@ -218,6 +224,7 @@ void reinitSalon(Salon_t *salon) {
 	salon->sockets_id[1] = 0;
 	salon->nb_sockets = 0;
 
+	//Close threads
 	for (i = 0; i < salon->nb_threads; i++) {
 		pthread_join (*salon->threads_joueurs[i], NULL);
 	}
@@ -231,6 +238,7 @@ void reinitSalon(Salon_t *salon) {
 	salon->threads_joueurs = malloc(2*sizeof(pthread_t));
 	printf("Réallocation d'espace pour les threads du salon %d\n", salon->id);
 
+	//Erase the grid
     int x, y;
     for (x = 0; x < TAILLE_LIGNE; x++) {
         for(y = 0; y < TAILLE_COLONNE; y++) {
@@ -239,9 +247,15 @@ void reinitSalon(Salon_t *salon) {
     }
 	printf("Remise à zéro de la grille du salon %d\n", salon->id);
 
+	//Yay, success !
 	printf("Salon %d réinitialisé avec succès \n", salon->id);
 }
 
+/**
+ * Initialize a lobby :
+ * - initialize the grid
+ * - create a thread for handlind basic thread requests
+ */
 void chargerSalons(Server *server) {
     server->salons = malloc(NB_SALONS * sizeof(Salon_t));
     int i;
@@ -285,6 +299,9 @@ void chargerSalons(Server *server) {
     server->nb_clients = 0;
 }
 
+/**
+ *	Wait for lobby threads to be finished
+ */
 void freeSalons(Server *server) {
 	int i;
 	for (i=0; i<NB_SALONS; i++) {
@@ -293,6 +310,9 @@ void freeSalons(Server *server) {
     free(server->salons);
 }
 
+/**
+ *	Try to join a lobby
+ */
 int rejoindreSalon(Server *server, Client *client, int num) {
     if (num < 1 || num > NB_SALONS) {
         return 0;
@@ -307,7 +327,8 @@ int rejoindreSalon(Server *server, Client *client, int num) {
         
     int retour = ajouter_joueur(salon, client->sd, idJoueur); 
     if (retour < 0) {
-        return 0;
+		printf("Impossible d'ajouter le joueur au salon\n");
+        return -1;
     }	
 
 	pthread_t thread;
@@ -325,11 +346,14 @@ int rejoindreSalon(Server *server, Client *client, int num) {
     return retour;
 }
 
+/**
+ * Thread inside each lobby who is dedicated to handle requests coming from one player
+ */
 void *gestion_joueur(void *data) {
 	Joueur_t *joueur = (Joueur_t*)data;
 	printf("Slot occupé : %d\n", joueur->slot);
 
-	char* buffer = reserver();
+	//char* buffer = reserver();
 	//int start = 1;
 
 	//Tant que le thread est en vie et que le socket l'est aussi
@@ -338,21 +362,27 @@ void *gestion_joueur(void *data) {
 	int retval;
 	int ended = 0;
 	int winner = 0;
+
+	//While there isn't any winner, while the game has not been "forced-ended" and while the socket is alive
 	while(((retval = getsockopt (joueur->slot, SOL_SOCKET, SO_ERROR, &error, &len )) == 0)
 			&& (ended == 0) && (winner == 0)) {
 
 			printf("Etat de la socket : %d\n", retval);
 			/*while (start == 1)*/ {
-			read(joueur->slot, buffer, TAILLE_MAX * sizeof(char));
-			printf("Message reçu : %s \n", buffer);
+			//read(joueur->slot, buffer, TAILLE_MAX * sizeof(char));
+			//printf("Message reçu : %s \n", buffer);
 			int retour;
 
-			Message *message = fromString(buffer);
+			Message *message = get_signal(joueur->slot);
 			printf("Message reçu pour le salon %d depuis %d\n", joueur->salon->id, message->salon);
+
+			//Check if the lobby targeted is the player's one.
 			if (message->salon == joueur->salon->id) {
 				printf("Message reçu pour le salon %d\n", joueur->salon->id);
+				//Switch on actions
 				switch (message->action) {
-					//Un joueur pose un jeton
+					
+					//If the player puts a token in the grid
 					case PLAYER_PUT_TOKEN:
 						if (message->couleur == joueur->salon->joueur_courant) {
 							retour = placerJeton(message->x, message->couleur, joueur->salon->grille);
@@ -384,6 +414,7 @@ void *gestion_joueur(void *data) {
 							}
 						}
 					break;
+
 					// >> Trying to handle violent player disconnecting
 					case DISCONNECTING:
 						printf("/!\\ Player trying to disconnect\n");
@@ -407,7 +438,10 @@ void *gestion_joueur(void *data) {
 	return NULL;
 }
 
-
+/**
+ * Check if the current player with the current IP address is new or already registered
+ * [UNUSED]
+ */
 int aJoueur(Server server, struct in_addr client) {
     int i = 0;
     while (i < server.nb_clients && client.s_addr != server.addr[i].s_addr) {
@@ -416,6 +450,9 @@ int aJoueur(Server server, struct in_addr client) {
     return (client.s_addr == server.addr[i].s_addr) ? i : -1;
 }
 
+/**
+ *	Add a client to the global server array of players
+ */
 int ajouter_client(Server *server, struct in_addr client) {
 	//printf("Nombre de clients avant opération : %d \n", server->nb_clients);
     server->addr[server->nb_clients++] = client;
@@ -423,29 +460,41 @@ int ajouter_client(Server *server, struct in_addr client) {
     return server->nb_clients-1;
 }
 
+/**
+ *	Broadcast a message to an entire lobby
+ */
 void diffuserMessage(Salon_t *salon, Message *message) {
 	int i;
 	for (i = 0; i < salon->nb_sockets; i++) {
-		char *buffer = toString(message);
-		printf("Message notifié au socket %d : %s \n", salon->sockets_id[i], buffer);
-		write(salon->sockets_id[i], buffer, TAILLE_MAX * sizeof(char));
+		//char *buffer = toString(message);
+		//printf("Message notifié au socket %d : %s \n", salon->sockets_id[i], buffer);
+		//write(salon->sockets_id[i], buffer, TAILLE_MAX * sizeof(char));
+		printf("Message notifié au socket %d : %s \n", salon->sockets_id[i], toString(message));
+		write(salon->sockets_id[i], message, sizeof(Message));
 	}
 }
 
+/**
+ *	Send a message to a specified player
+ */
 void envoyerMessageJoueur(int slot, Message *message) {
-	write(slot, toString(message), TAILLE_MAX * sizeof(char));
+	//write(slot, toString(message), TAILLE_MAX * sizeof(char));
+	write(slot, message, sizeof(Message));
 }
 
+/**
+ * Retrieve the signal from a socket identifier
+ */
 Message* get_signal(int sd) {
-	char* buf = malloc(TAILLE_MAX * sizeof(char));
-	recv(sd, buf, TAILLE_MAX * sizeof(char), MSG_WAITALL);
-	printf("Message reçu : %s\n", buf);
-	Message *message = fromString(buf);
-	free(buf);
+	Message *message = malloc(sizeof(*message));
+	recv(sd, message, sizeof(Message), MSG_WAITALL);
+	//printf("Reçu : %s\n", toString(message));
 	return message;
 }
 
-//Fonction permettant de kill le processus, ou fermer le port (a voir) lorsqu'on ferme le serveur (CTRL+C)
+/**
+ * Function dedicated to interact with Ctrl+C keystroke
+ */
 void handler_arret(int sig_num)
 {
 	
