@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "client.h"
 #include <signal.h>
+#include <pthread.h>
 
 int sd;
 
@@ -19,6 +20,14 @@ void handler_arret(int signum)
 	se_deconnecter(sd);
 	exit(1);
 }	
+
+void *heartbeat_handling(void *datas)
+{
+	while(1) {
+		//printf("Connexion au serveur en cours...\n");
+		sleep(4);
+	}
+}
 
 /**
  * main()
@@ -82,6 +91,14 @@ int main()
 			commencee = partie_commencee(sd);
 		}
 		printf("La partie est sur le point de commencer !\n");
+	}
+
+	pthread_t thread;
+	if(pthread_create(&thread , NULL , heartbeat_handling , (void*) NULL) < 0)
+	{
+		printf("Erreur : impossible d'initialiser le module de surveillance de l'état de la connexion...\n");
+		se_deconnecter(sd);
+		return 1;
 	}
 
 	//Initialize a local grid
